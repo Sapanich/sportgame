@@ -4,13 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SportG - ระบบบริหารจัดการแข่งขันกีฬาสี Real-Time</title>
-  <!-- Google Fonts: Prompt & Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     body {
@@ -41,7 +38,6 @@
   <!-- TOP HEADER & BRANDING -->
   <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-lg no-print">
     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-      <!-- Logo & Event Name -->
       <div class="flex items-center gap-3">
         <div id="brandLogoContainer" class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center overflow-hidden shadow-md shrink-0">
           <i data-lucide="trophy" class="w-7 h-7 text-slate-900"></i>
@@ -57,14 +53,12 @@
         </div>
       </div>
 
-      <!-- Right Controls: Year Selector, 5-Level Font Size, Sync, Auth -->
       <div class="flex flex-wrap items-center gap-2">
-        <!-- Year Selector -->
         <select id="globalYearSelect" onchange="changeActiveYearView(this.value)" class="bg-slate-800 text-white text-xs md:text-sm rounded-lg px-2.5 py-1.5 border border-slate-700 focus:outline-none focus:border-blue-400">
           <option value="">ปีการศึกษา...</option>
         </select>
 
-        <!-- 5-Level Font Size Switcher -->
+        <!-- ปรับขนาดตัวอักษร 5 ระดับ -->
         <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700" title="ปรับขนาดตัวอักษรทั้งระบบ 5 ระดับ">
           <span class="text-xs text-slate-400 px-1.5">ก</span>
           <button onclick="setFontLevel(1)" data-font-lvl="1" class="font-lvl-btn w-6 h-6 text-xs rounded font-semibold hover:bg-slate-700">1</button>
@@ -75,12 +69,10 @@
           <span class="text-sm font-bold text-slate-300 px-1.5">ก+</span>
         </div>
 
-        <!-- Manual Sync -->
         <button onclick="fetchState(true)" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 text-slate-200 transition" title="ซิงค์ข้อมูลทันที">
           <i id="syncIcon" data-lucide="refresh-cw" class="w-4 h-4"></i>
         </button>
 
-        <!-- User Auth Button -->
         <div id="authArea">
           <button onclick="openLoginModal()" class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs md:text-sm font-medium px-3 py-1.5 rounded-lg transition shadow">
             <i data-lucide="log-in" class="w-4 h-4"></i> เจ้าหน้าที่
@@ -89,7 +81,6 @@
       </div>
     </div>
 
-    <!-- Navigation Tabs -->
     <nav class="bg-slate-800/90 border-t border-slate-700/80 overflow-x-auto">
       <div class="max-w-7xl mx-auto px-4 py-2 flex items-center gap-1.5 min-w-max" id="mainNav">
         <button onclick="switchTab('dashboard')" data-tab="dashboard" class="nav-btn active flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-slate-200 hover:bg-slate-700 transition">
@@ -117,19 +108,13 @@
     </nav>
   </header>
 
-  <!-- MAIN CONTENT CONTAINER -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6">
-    <!-- Status Toast -->
     <div id="toast" class="fixed bottom-5 right-5 z-50 hidden bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-700 flex items-center gap-2.5 text-sm"></div>
 
-    <!-- ===================================================================
-         TAB 1: DASHBOARD (REAL-TIME OVERALL TROPHY & LIVE MATCHES)
-         =================================================================== -->
+    <!-- TAB 1: DASHBOARD -->
     <section id="tab-dashboard" class="tab-content space-y-6">
-      <!-- Top Summary Cards -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="kpiCards"></div>
 
-      <!-- Overall Trophy Standings -->
       <div class="glass-card rounded-2xl p-5 md:p-6">
         <div class="flex flex-wrap items-center justify-between gap-2 mb-5">
           <div>
@@ -142,7 +127,6 @@
         <div id="leaderboardContainer" class="space-y-3"></div>
       </div>
 
-      <!-- Live & Upcoming Matches -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="glass-card rounded-2xl p-5">
           <h3 class="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
@@ -159,9 +143,7 @@
       </div>
     </section>
 
-    <!-- ===================================================================
-         TAB 2: SCHEDULE MANAGEMENT
-         =================================================================== -->
+    <!-- TAB 2: SCHEDULE -->
     <section id="tab-schedule" class="tab-content hidden space-y-5">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -173,7 +155,6 @@
         </button>
       </div>
 
-      <!-- Filters -->
       <div class="glass-card rounded-xl p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <select id="filterSchedDate" onchange="renderSchedule()" class="border border-slate-300 rounded-lg px-3 py-2 text-sm">
           <option value="">ทุกวันที่แข่งขัน</option>
@@ -195,9 +176,7 @@
       <div id="scheduleTableContainer" class="space-y-3"></div>
     </section>
 
-    <!-- ===================================================================
-         TAB 3: SCORE RECORDING (REFEREE / ADMIN)
-         =================================================================== -->
+    <!-- TAB 3: SCORE RECORDING -->
     <section id="tab-scoring" class="tab-content hidden space-y-5">
       <div>
         <h2 class="text-xl font-bold text-slate-900">บันทึกผลการแข่งขัน (Official Score Recorder)</h2>
@@ -205,14 +184,12 @@
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Match Selector -->
         <div class="glass-card rounded-2xl p-4 space-y-3">
           <h3 class="font-bold text-slate-800">1. เลือกรายการแข่งขัน</h3>
           <input type="text" id="scoreSearchInput" oninput="renderScoringMatchList()" placeholder="ค้นหากีฬา, รอบ, สนาม..." class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
           <div id="scoringMatchList" class="space-y-2 max-h-[550px] overflow-y-auto pr-1"></div>
         </div>
 
-        <!-- Dynamic Score Form -->
         <div class="lg:col-span-2 glass-card rounded-2xl p-5" id="scoreFormPanel">
           <div class="text-center py-16 text-slate-400">
             <i data-lucide="mouse-pointer-click" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
@@ -222,9 +199,7 @@
       </div>
     </section>
 
-    <!-- ===================================================================
-         TAB 4: REPORTS (BY DAY / BY COLOR / BY SPORT)
-         =================================================================== -->
+    <!-- TAB 4: REPORTS -->
     <section id="tab-reports" class="tab-content hidden space-y-5">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -241,20 +216,16 @@
         </div>
       </div>
 
-      <!-- Report Mode Switcher -->
       <div class="flex flex-wrap gap-2 bg-slate-200/70 p-1.5 rounded-xl w-fit no-print">
         <button onclick="setReportMode('day')" id="repBtn-day" class="rep-mode-btn bg-white text-blue-700 shadow px-4 py-2 rounded-lg text-sm font-semibold">แยกตามวันแข่งขัน</button>
         <button onclick="setReportMode('color')" id="repBtn-color" class="rep-mode-btn text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold">แยกตามคณะสี</button>
         <button onclick="setReportMode('sport')" id="repBtn-sport" class="rep-mode-btn text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold">แยกตามประเภทกีฬา</button>
       </div>
 
-      <div id="reportFilterBar" class="no-print"></div>
       <div id="reportOutputArea" class="space-y-4"></div>
     </section>
 
-    <!-- ===================================================================
-         TAB 5: SPORTS & SCORING RULES CONFIG
-         =================================================================== -->
+    <!-- TAB 5: SPORTS & SCORING RULES -->
     <section id="tab-sports" class="tab-content hidden space-y-5">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -268,11 +239,8 @@
       <div id="sportsListContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
     </section>
 
-    <!-- ===================================================================
-         TAB 6: MASTER DATA (YEARS, COLORS, USERS & ASSIGNMENTS)
-         =================================================================== -->
+    <!-- TAB 6: MASTER DATA -->
     <section id="tab-master" class="tab-content hidden space-y-6">
-      <!-- Years -->
       <div class="glass-card rounded-2xl p-5 space-y-4">
         <div class="flex items-center justify-between">
           <h3 class="text-lg font-bold text-slate-900">1. จัดการข้อมูลปีการศึกษา (Academic Years)</h3>
@@ -281,7 +249,6 @@
         <div id="yearsListContainer" class="grid grid-cols-1 md:grid-cols-3 gap-3"></div>
       </div>
 
-      <!-- Colors -->
       <div class="glass-card rounded-2xl p-5 space-y-4">
         <div class="flex items-center justify-between">
           <h3 class="text-lg font-bold text-slate-900">2. จัดการคณะสี (Teams / Colors)</h3>
@@ -290,7 +257,6 @@
         <div id="colorsListContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"></div>
       </div>
 
-      <!-- Users & Assignments -->
       <div class="glass-card rounded-2xl p-5 space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <h3 class="text-lg font-bold text-slate-900">3. จัดการผู้ใช้งานและสิทธิ์กรรมการ (Users & Assignments)</h3>
@@ -316,9 +282,7 @@
       </div>
     </section>
 
-    <!-- ===================================================================
-         TAB 7: EVENT BRANDING & API CONNECTION SETTINGS
-         =================================================================== -->
+    <!-- TAB 7: SETTINGS -->
     <section id="tab-settings" class="tab-content hidden max-w-3xl mx-auto">
       <div class="glass-card rounded-2xl p-6 space-y-5">
         <div>
@@ -368,17 +332,13 @@
     </section>
   </main>
 
-  <!-- UNIVERSAL MODAL CONTAINER -->
+  <!-- MODAL -->
   <div id="modalBackdrop" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div id="modalBox" class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto"></div>
   </div>
 
-  <!-- ===================================================================
-       JAVASCRIPT APPLICATION ENGINE
-       =================================================================== -->
   <script>
-    // ใส่ Web App URL จาก Google Apps Script ที่ Deploy แล้วตรงนี้
-    const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbwqqZ2jtbIQm_wchphx0HvKr4IWPzuJb2q-FaXsIJtzqEFm2mXEoaEh-2AtMo09QeND/exec';
+    const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_DEPLOYMENT_ID/exec';
 
     let GAS_URL = localStorage.getItem('sportg_gas_url') || DEFAULT_GAS_URL;
     let APP_STATE = null;
@@ -389,7 +349,50 @@
     let POLL_TIMER = null;
     let REPORT_MODE = 'day';
 
-    // กติกามาตรฐานสากลสำเร็จรูป (International Presets)
+    const THAI_MONTHS_SHORT = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+    const THAI_MONTHS_FULL = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+
+    // แปลงวันที่ YYYY-MM-DD เป็น วัน เดือน ปี พ.ศ. (เช่น 21 ธ.ค. 2569)
+    function formatThaiDate(dateStr, fullMonth = false) {
+      if (!dateStr) return '-';
+      const clean = String(dateStr).split('T')[0].trim();
+      const parts = clean.split('-');
+      if (parts.length !== 3) return dateStr;
+      const yearCE = parseInt(parts[0], 10);
+      const monthIdx = parseInt(parts[1], 10) - 1;
+      const day = parseInt(parts[2], 10);
+      if (isNaN(yearCE) || monthIdx < 0 || monthIdx > 11 || isNaN(day)) return dateStr;
+      const yearBE = yearCE + 543;
+      const mName = fullMonth ? THAI_MONTHS_FULL[monthIdx] : THAI_MONTHS_SHORT[monthIdx];
+      return fullMonth ? `${day} ${mName} พ.ศ. ${yearBE}` : `${day} ${mName} ${yearBE}`;
+    }
+
+    // แปลงวันที่เป็น วว/ดด/พ.ศ. สำหรับ CSV
+    function formatThaiDateSlash(dateStr) {
+      if (!dateStr) return '';
+      const parts = String(dateStr).split('T')[0].split('-');
+      if (parts.length !== 3) return dateStr;
+      const yearBE = parseInt(parts[0], 10) + 543;
+      return `${parts[2]}/${parts[1]}/${yearBE}`;
+    }
+
+    // จัดรูปแบบเวลา 24 ชั่วโมง (HH:mm) รองรับทั้งค่าจาก Sheet และ ISO String
+    function formatTime24(timeVal) {
+      if (!timeVal) return '--:--';
+      const str = String(timeVal).trim().replace(/^'/, '');
+      if (str.includes('T')) {
+        const d = new Date(str);
+        if (!isNaN(d.getTime())) {
+          return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        }
+      }
+      const match = str.match(/^(\d{1,2}):(\d{2})/);
+      if (match) {
+        return `${match[1].padStart(2, '0')}:${match[2]}`;
+      }
+      return str;
+    }
+
     const SPORT_PRESETS = {
       STD_FOOTBALL: {
         label: 'ฟุตบอล / ฟุตซอล (มาตรฐานสากล - นับประตู + จุดโทษ)',
@@ -435,9 +438,6 @@
       }
     };
 
-    // -------------------------------------------------------------------------
-    // INITIALIZATION & 5-LEVEL FONT SCALING
-    // -------------------------------------------------------------------------
     document.addEventListener('DOMContentLoaded', () => {
       const savedFontLvl = Number(localStorage.getItem('sportg_font_level') || 3);
       setFontLevel(savedFontLvl);
@@ -480,9 +480,6 @@
       fetchState(true);
     }
 
-    // -------------------------------------------------------------------------
-    // REAL-TIME DATA SYNC ENGINE
-    // -------------------------------------------------------------------------
     async function fetchState(forceRender = false) {
       const syncIcon = document.getElementById('syncIcon');
       if (syncIcon) syncIcon.classList.add('animate-spin');
@@ -498,7 +495,7 @@
             if (!SELECTED_YEAR_ID) SELECTED_YEAR_ID = newData.active_year_id;
             renderAll();
           }
-          document.getElementById('lastSyncText').textContent = new Date().toLocaleTimeString('th-TH');
+          document.getElementById('lastSyncText').textContent = new Date().toLocaleTimeString('th-TH', { hour12: false }) + ' น.';
           setupPolling(Number(newData.settings.refresh_interval_sec || 8));
         }
       } catch (err) {
@@ -530,14 +527,10 @@
       return json;
     }
 
-    // -------------------------------------------------------------------------
-    // MASTER RENDERER
-    // -------------------------------------------------------------------------
     function renderAll() {
       if (!APP_STATE) return;
       const { settings, years, active_year_id } = APP_STATE;
 
-      // Branding
       document.getElementById('headerEventName').textContent = settings.event_name || 'SportG Arena';
       document.getElementById('headerEventSubtitle').textContent = settings.event_subtitle || '';
       const logoBox = document.getElementById('brandLogoContainer');
@@ -545,13 +538,11 @@
         logoBox.innerHTML = `<img src="${settings.logo_url}" alt="Logo" class="w-full h-full object-cover">`;
       }
 
-      // Year Dropdown
       const yrSelect = document.getElementById('globalYearSelect');
       yrSelect.innerHTML = years.map(y =>
         `<option value="${y.year_id}" ${y.year_id === active_year_id ? 'selected' : ''}>${y.year_name}</option>`
       ).join('');
 
-      // Populate Settings Form
       if (document.getElementById('setEventName')) {
         document.getElementById('setEventName').value = settings.event_name || '';
         document.getElementById('setEventSubtitle').value = settings.event_subtitle || '';
@@ -575,9 +566,7 @@
       fetchState(true);
     }
 
-    // -------------------------------------------------------------------------
     // TAB 1: DASHBOARD
-    // -------------------------------------------------------------------------
     function renderDashboard() {
       const { leaderboard, schedules, results, sports, colors } = APP_STATE;
       const completedCount = schedules.filter(s => s.status === 'COMPLETED').length;
@@ -638,13 +627,11 @@
         `;
       }).join('');
 
-      // Upcoming & Live
       const upcoming = schedules.filter(s => s.status !== 'COMPLETED').slice(0, 5);
       document.getElementById('upcomingMatchesList').innerHTML = upcoming.length
         ? upcoming.map(sc => renderMatchCardCompact(sc)).join('')
         : '<p class="text-sm text-slate-400 py-4 text-center">ไม่มีรายการที่รอแข่งขัน</p>';
 
-      // Recent Results
       const recent = [...results].reverse().slice(0, 5);
       document.getElementById('recentResultsList').innerHTML = recent.length
         ? recent.map(r => renderResultCardCompact(r)).join('')
@@ -668,8 +655,8 @@
             <div class="flex flex-wrap gap-1.5 mt-1.5">${renderColorPills(pIds)}</div>
           </div>
           <div class="text-right text-xs text-slate-600 shrink-0">
-            <div class="font-semibold">${sc.match_date}</div>
-            <div>${sc.start_time} น. • ${sc.venue}</div>
+            <div class="font-semibold">${formatThaiDate(sc.match_date)}</div>
+            <div>${formatTime24(sc.start_time)} น. • ${sc.venue}</div>
           </div>
         </div>
       `;
@@ -692,7 +679,7 @@
                 <div class="flex items-center justify-between text-xs bg-white px-2.5 py-1 rounded border border-slate-100">
                   <span class="flex items-center gap-1.5 font-semibold">
                     <span class="w-2.5 h-2.5 rounded-full" style="background:${col ? col.hex_code : '#999'}"></span>
-                    อันดับ ${rk.rank}: ${col ? col.color_name : rk.color_id}
+                    อันดับ ${rk.rank}: ${col ? (col.color_name || rk.color_id) : rk.color_id}
                   </span>
                   <span class="font-mono font-bold text-slate-800">${rk.score_display || ''}</span>
                 </div>
@@ -703,13 +690,11 @@
       `;
     }
 
-    // -------------------------------------------------------------------------
     // TAB 2: SCHEDULE
-    // -------------------------------------------------------------------------
     function populateScheduleFilters() {
       const dates = [...new Set(APP_STATE.schedules.map(s => s.match_date))].sort();
       document.getElementById('filterSchedDate').innerHTML = '<option value="">ทุกวันที่แข่งขัน</option>' +
-        dates.map(d => `<option value="${d}">${d}</option>`).join('');
+        dates.map(d => `<option value="${d}">${formatThaiDate(d)}</option>`).join('');
       document.getElementById('filterSchedSport').innerHTML = '<option value="">ทุกประเภทกีฬา</option>' +
         APP_STATE.sports.map(s => `<option value="${s.sport_id}">${s.sport_name}</option>`).join('');
       document.getElementById('filterSchedColor').innerHTML = '<option value="">ทุกคณะสี</option>' +
@@ -753,7 +738,7 @@
             </div>
             <div class="flex items-center gap-4">
               <div class="text-right text-sm">
-                <div class="font-semibold text-slate-800">📅 ${sc.match_date} | ⏰ ${sc.start_time} - ${sc.end_time}</div>
+                <div class="font-semibold text-slate-800">📅 ${formatThaiDate(sc.match_date)} | ⏰ ${formatTime24(sc.start_time)} - ${formatTime24(sc.end_time)} น.</div>
                 <div class="text-xs text-slate-500">📍 สนาม: ${sc.venue}</div>
               </div>
               ${canEdit ? `
@@ -769,15 +754,12 @@
       lucide.createIcons();
     }
 
-    // -------------------------------------------------------------------------
-    // TAB 3: SCORE RECORDING (DYNAMIC BY SPORT RULE)
-    // -------------------------------------------------------------------------
+    // TAB 3: SCORE RECORDING
     function renderScoringMatchList() {
       const q = (document.getElementById('scoreSearchInput')?.value || '').toLowerCase();
       const allowedSchedules = APP_STATE.schedules.filter(sc => {
         if (!CURRENT_USER) return false;
         if (CURRENT_USER.role === 'ADMIN' || CURRENT_USER.role === 'ORGANIZER') return true;
-        // ตรวจสอบสิทธิ์ตามตาราง assignments
         return USER_ASSIGNMENTS.some(a =>
           (a.sport_id === 'ALL' || a.sport_id === sc.sport_id) &&
           (a.venue === 'ALL' || a.venue === sc.venue) &&
@@ -798,7 +780,7 @@
               <span class="font-bold text-sm text-slate-900">${sport ? sport.sport_name : sc.sport_id}</span>
               <span class="text-xs px-2 py-0.5 rounded ${isDone ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}">${isDone ? 'บันทึกแล้ว' : 'รอบันทึก'}</span>
             </div>
-            <div class="text-xs text-slate-500 mt-1">${sc.round_name} • ${sc.match_date} (${sc.start_time})</div>
+            <div class="text-xs text-slate-500 mt-1">${sc.round_name} • ${formatThaiDate(sc.match_date)} (${formatTime24(sc.start_time)} น.)</div>
           </button>
         `;
       }).join('') || '<p class="text-sm text-slate-400 text-center py-6">ไม่มีรายการที่ได้รับมอบหมาย</p>';
@@ -810,7 +792,6 @@
       const existingRes = APP_STATE.results.find(r => r.schedule_id === scheduleId);
       const pIds = safeJson(sc.participants_json, []);
       const ruleCfg = safeJson(sport.rule_config_json, {});
-      const trophyPts = safeJson(sport.trophy_points_json, {});
       const prevScores = existingRes ? safeJson(existingRes.scores_detail_json, {}) : {};
 
       const isFinalDefault = sc.round_name.includes('ชิง') || pIds.length > 2;
@@ -821,7 +802,7 @@
             <div>
               <span class="text-xs font-bold uppercase text-blue-600">${sport.category} • ${sport.scoring_mode}</span>
               <h3 class="text-lg font-bold text-slate-900">${sport.sport_name} (${sc.round_name})</h3>
-              <p class="text-xs text-slate-500">วันที่ ${sc.match_date} เวลา ${sc.start_time} น. • สนาม ${sc.venue}</p>
+              <p class="text-xs text-slate-500">วันที่ ${formatThaiDate(sc.match_date)} เวลา ${formatTime24(sc.start_time)} น. • สนาม ${sc.venue}</p>
             </div>
             <label class="flex items-center gap-2 bg-amber-50 border border-amber-200 px-3 py-2 rounded-xl text-xs font-semibold text-amber-900 cursor-pointer">
               <input type="checkbox" id="isFinalRoundCheck" ${isFinalDefault ? 'checked' : ''} onchange="recalcScorePreview('${sc.schedule_id}')">
@@ -830,15 +811,15 @@
           </div>
 
           <div class="space-y-3" id="participantScoreRows">
-            ${pIds.map((colId, idx) => {
+            ${pIds.map(colId => {
               const col = getColorById(colId);
               const saved = prevScores[colId] || {};
               return `
                 <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-2">
                   <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2 font-bold text-slate-900">
-                      <span class="w-4 h-4 rounded-full" style="background:${col.hex_code}"></span>
-                      ${col.color_name}
+                      <span class="w-4 h-4 rounded-full" style="background:${col ? col.hex_code : '#64748b'}"></span>
+                      ${col ? (col.color_name || colId) : colId}
                     </div>
                     <span id="previewPts_${colId}" class="text-xs font-bold px-2.5 py-1 rounded-lg bg-blue-100 text-blue-800">+0 คะแนนถ้วยรวม</span>
                   </div>
@@ -902,7 +883,6 @@
         scoresDetail[inp.dataset.col][inp.dataset.field] = inp.value;
       });
 
-      // จัดอันดับ
       const items = pIds.map(colId => {
         const d = scoresDetail[colId];
         return {
@@ -982,9 +962,7 @@
       });
     }
 
-    // -------------------------------------------------------------------------
-    // TAB 4: REPORTS (BY DAY / COLOR / SPORT)
-    // -------------------------------------------------------------------------
+    // TAB 4: REPORTS
     function setReportMode(mode) {
       REPORT_MODE = mode;
       document.querySelectorAll('.rep-mode-btn').forEach(btn => {
@@ -1007,7 +985,7 @@
           const daySchedules = schedules.filter(s => s.match_date === date);
           return `
             <div class="glass-card rounded-2xl p-5 space-y-3">
-              <h3 class="text-lg font-bold text-slate-900 border-b pb-2">📅 วันที่แข่งขัน: ${date} (${daySchedules.length} รายการ)</h3>
+              <h3 class="text-lg font-bold text-slate-900 border-b pb-2">📅 วันที่แข่งขัน: ${formatThaiDate(date, true)} (${daySchedules.length} รายการ)</h3>
               <div class="space-y-2">
                 ${daySchedules.map(sc => {
                   const res = results.find(r => r.schedule_id === sc.schedule_id);
@@ -1034,7 +1012,7 @@
               <div class="overflow-x-auto">
                 <table class="w-full text-sm text-left">
                   <thead class="bg-slate-50 text-slate-600">
-                    <tr><th class="p-2">กีฬา</th><th class="p-2">รอบ</th><th class="p-2">ผลงาน/สถิติ</th><th class="p-2">อันดับ</th><th class="p-2 text-right">คะแนนถ้วยรวม</th></tr>
+                    <tr><th class="p-2">กีฬา</th><th class="p-2">รอบ</th><th class="p-2">วันที่</th><th class="p-2">ผลงาน/สถิติ</th><th class="p-2">อันดับ</th><th class="p-2 text-right">คะแนนถ้วยรวม</th></tr>
                   </thead>
                   <tbody class="divide-y">
                     ${colResults.map(r => {
@@ -1045,6 +1023,7 @@
                       return `<tr>
                         <td class="p-2 font-semibold">${sp?.sport_name || r.sport_id}</td>
                         <td class="p-2">${sc?.round_name || '-'}</td>
+                        <td class="p-2 text-xs">${sc ? formatThaiDate(sc.match_date) : '-'}</td>
                         <td class="p-2 font-mono">${rk?.score_display || '-'}</td>
                         <td class="p-2 font-bold">อันดับ ${rk?.rank || '-'}</td>
                         <td class="p-2 text-right font-bold text-emerald-700">+${pts}</td>
@@ -1075,7 +1054,7 @@
     }
 
     function exportReportCSV() {
-      let csv = '\uFEFFประเภทกีฬา,รอบการแข่งขัน,วันที่,สี,อันดับ,สถิติ/คะแนน,คะแนนถ้วยรางวัลรวม\n';
+      let csv = '\uFEFFประเภทกีฬา,รอบการแข่งขัน,วันที่ (พ.ศ.),เวลา,สี,อันดับ,สถิติ/คะแนน,คะแนนถ้วยรางวัลรวม\n';
       APP_STATE.results.forEach(r => {
         const sp = getSportById(r.sport_id);
         const sc = APP_STATE.schedules.find(s => s.schedule_id === r.schedule_id);
@@ -1083,7 +1062,8 @@
         const ptsMap = safeJson(r.trophy_awarded_json, {});
         rks.forEach(rk => {
           const col = getColorById(rk.color_id);
-          csv += `"${sp?.sport_name || ''}","${sc?.round_name || ''}","${sc?.match_date || ''}","${col?.color_name || ''}",${rk.rank},"${rk.score_display}",${ptsMap[rk.color_id] || 0}\n`;
+          const timeStr = sc ? `${formatTime24(sc.start_time)}-${formatTime24(sc.end_time)}` : '';
+          csv += `"${sp?.sport_name || ''}","${sc?.round_name || ''}","${sc ? formatThaiDateSlash(sc.match_date) : ''}","${timeStr}","${col?.color_name || ''}",${rk.rank},"${rk.score_display}",${ptsMap[rk.color_id] || 0}\n`;
         });
       });
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -1093,9 +1073,7 @@
       link.click();
     }
 
-    // -------------------------------------------------------------------------
-    // TAB 5: SPORTS & TROPHY POINTS CONFIG
-    // -------------------------------------------------------------------------
+    // TAB 5: SPORTS
     function renderSportsTab() {
       document.getElementById('sportsListContainer').innerHTML = APP_STATE.sports.map(sp => {
         const pts = safeJson(sp.trophy_points_json, {});
@@ -1236,12 +1214,36 @@
       });
     }
 
-    // -------------------------------------------------------------------------
-    // SCHEDULE MODAL
-    // -------------------------------------------------------------------------
+    // สร้างตัวเลือกชั่วโมง 00-23 และนาที 00-59 แบบ 24 ชั่วโมง
+    function build24HourOptions(selectedTime, fallbackTime) {
+      const clean = formatTime24(selectedTime || fallbackTime);
+      const [selH, selM] = clean.includes(':') ? clean.split(':') : fallbackTime.split(':');
+      const hoursHtml = Array.from({ length: 24 }, (_, i) => {
+        const h = String(i).padStart(2, '0');
+        return `<option value="${h}" ${h === selH ? 'selected' : ''}>${h}</option>`;
+      }).join('');
+      const minsHtml = Array.from({ length: 60 }, (_, i) => {
+        const m = String(i).padStart(2, '0');
+        return `<option value="${m}" ${m === selM ? 'selected' : ''}>${m}</option>`;
+      }).join('');
+      return { hoursHtml, minsHtml };
+    }
+
+    function updateModalThaiDatePreview() {
+      const val = document.getElementById('scDate')?.value;
+      const previewEl = document.getElementById('scDateThaiPreview');
+      if (previewEl) {
+        previewEl.textContent = val ? `ตรงกับวันที่: ${formatThaiDate(val, true)}` : 'กรุณาเลือกวันที่แข่งขัน';
+      }
+    }
+
+    // SCHEDULE MODAL (วัน เดือน ปี พ.ศ. + เวลา 24 ชั่วโมง)
     function openScheduleModal(scheduleId = '') {
       const sc = scheduleId ? APP_STATE.schedules.find(s => s.schedule_id === scheduleId) : null;
       const selectedCols = sc ? safeJson(sc.participants_json, []) : [];
+      const defaultDate = sc?.match_date || new Date().toISOString().split('T')[0];
+      const startOpts = build24HourOptions(sc?.start_time, '09:00');
+      const endOpts = build24HourOptions(sc?.end_time, '10:00');
 
       openModal(`
         <h3 class="text-lg font-bold mb-4">${sc ? 'แก้ไขตารางแข่งขัน' : 'เพิ่มตารางแข่งขันใหม่'}</h3>
@@ -1255,25 +1257,36 @@
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block font-semibold mb-1">รอบการแข่งขัน</label>
-              <input type="text" id="scRound" required value="${sc?.round_name || 'รอบแบ่งกลุ่ม'}" placeholder="เช่น รอบแรก, รอบชิงชนะเลิศ" class="w-full border rounded-xl px-3 py-2">
+              <input type="text" id="scRound" required value="${sc?.round_name || 'รอบแรก'}" placeholder="เช่น รอบแรก, รอบชิงชนะเลิศ" class="w-full border rounded-xl px-3 py-2">
             </div>
             <div>
               <label class="block font-semibold mb-1">สนามแข่งขัน</label>
               <input type="text" id="scVenue" required value="${sc?.venue || 'สนามกลาง 1'}" class="w-full border rounded-xl px-3 py-2">
             </div>
           </div>
-          <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block font-semibold mb-1">วันที่แข่งขัน (แสดงผลเป็น พ.ศ.)</label>
+            <input type="date" id="scDate" required value="${defaultDate}" onchange="updateModalThaiDatePreview()" class="w-full border rounded-xl px-3 py-2">
+            <p id="scDateThaiPreview" class="text-xs font-semibold text-blue-700 mt-1">ตรงกับวันที่: ${formatThaiDate(defaultDate, true)}</p>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block font-semibold mb-1">วันที่แข่ง</label>
-              <input type="date" id="scDate" required value="${sc?.match_date || ''}" class="w-full border rounded-xl px-3 py-2">
+              <label class="block font-semibold mb-1">เวลาเริ่ม (ระบบ 24 ชั่วโมง)</label>
+              <div class="flex items-center gap-1.5">
+                <select id="scStartH" class="w-full border rounded-xl px-2.5 py-2 font-mono font-semibold">${startOpts.hoursHtml}</select>
+                <span class="font-bold">:</span>
+                <select id="scStartM" class="w-full border rounded-xl px-2.5 py-2 font-mono font-semibold">${startOpts.minsHtml}</select>
+                <span class="text-xs text-slate-500 shrink-0">น.</span>
+              </div>
             </div>
             <div>
-              <label class="block font-semibold mb-1">เวลาเริ่ม</label>
-              <input type="time" id="scStart" required value="${sc?.start_time || '09:00'}" class="w-full border rounded-xl px-3 py-2">
-            </div>
-            <div>
-              <label class="block font-semibold mb-1">เวลาสิ้นสุด</label>
-              <input type="time" id="scEnd" required value="${sc?.end_time || '10:00'}" class="w-full border rounded-xl px-3 py-2">
+              <label class="block font-semibold mb-1">เวลาสิ้นสุด (ระบบ 24 ชั่วโมง)</label>
+              <div class="flex items-center gap-1.5">
+                <select id="scEndH" class="w-full border rounded-xl px-2.5 py-2 font-mono font-semibold">${endOpts.hoursHtml}</select>
+                <span class="font-bold">:</span>
+                <select id="scEndM" class="w-full border rounded-xl px-2.5 py-2 font-mono font-semibold">${endOpts.minsHtml}</select>
+                <span class="text-xs text-slate-500 shrink-0">น.</span>
+              </div>
             </div>
           </div>
           <div>
@@ -1283,7 +1296,7 @@
                 <label class="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" class="sc-col-chk" value="${c.color_id}" ${selectedCols.includes(c.color_id) ? 'checked' : ''}>
                   <span class="w-3 h-3 rounded-full" style="background:${c.hex_code}"></span>
-                  <span>${c.color_name}</span>
+                  <span>${c.color_name || c.color_id}</span>
                 </label>
               `).join('')}
             </div>
@@ -1300,6 +1313,9 @@
         alert('กรุณาเลือกคณะสีที่ลงแข่งขันอย่างน้อย 2 สี');
         return;
       }
+      const startTime24 = `${document.getElementById('scStartH').value}:${document.getElementById('scStartM').value}`;
+      const endTime24 = `${document.getElementById('scEndH').value}:${document.getElementById('scEndM').value}`;
+
       closeModal();
       await postApi({
         action: 'upsert_record',
@@ -1311,8 +1327,8 @@
           sport_id: document.getElementById('scSport').value,
           round_name: document.getElementById('scRound').value,
           match_date: document.getElementById('scDate').value,
-          start_time: document.getElementById('scStart').value,
-          end_time: document.getElementById('scEnd').value,
+          start_time: startTime24,
+          end_time: endTime24,
           venue: document.getElementById('scVenue').value,
           participants_json: JSON.stringify(cols),
           status: 'SCHEDULED',
@@ -1321,11 +1337,8 @@
       });
     }
 
-    // -------------------------------------------------------------------------
-    // TAB 6: MASTER DATA (YEARS, COLORS, USERS & ASSIGNMENTS)
-    // -------------------------------------------------------------------------
+    // TAB 6: MASTER DATA
     function renderMasterTab() {
-      // Years
       document.getElementById('yearsListContainer').innerHTML = APP_STATE.years.map(y => {
         const isActive = String(y.is_active).toUpperCase() === 'TRUE';
         return `
@@ -1336,18 +1349,17 @@
                 : `<button onclick="postApi({action:'set_active_year', year_id:'${y.year_id}'})" class="text-xs text-blue-600 underline">ตั้งเป็นปีปัจจุบัน</button>`}
             </div>
             <p class="text-xs text-slate-500 mt-1">${y.theme_name || ''}</p>
-            <p class="text-xs text-slate-400 mt-0.5">${y.start_date} ถึง ${y.end_date}</p>
+            <p class="text-xs text-slate-400 mt-0.5">${formatThaiDate(y.start_date)} ถึง ${formatThaiDate(y.end_date)}</p>
           </div>
         `;
       }).join('');
 
-      // Colors
       document.getElementById('colorsListContainer').innerHTML = APP_STATE.colors.map(c => `
         <div class="p-4 rounded-xl border border-slate-200 flex items-center justify-between">
           <div class="flex items-center gap-3">
             <span class="w-8 h-8 rounded-xl shadow-inner shrink-0" style="background:${c.hex_code}"></span>
             <div>
-              <div class="font-bold text-sm text-slate-900">${c.color_name}</div>
+              <div class="font-bold text-sm text-slate-900">${c.color_name || c.color_id}</div>
               <div class="text-xs text-slate-500">${c.motto || ''}</div>
             </div>
           </div>
@@ -1355,7 +1367,6 @@
         </div>
       `).join('');
 
-      // Users & Assignments
       document.getElementById('usersTableBody').innerHTML = APP_STATE.users.map(u => {
         const userAssigns = APP_STATE.assignments.filter(a => a.user_id === u.user_id);
         const assignLabels = userAssigns.map(a => {
@@ -1512,9 +1523,7 @@
       });
     }
 
-    // -------------------------------------------------------------------------
-    // TAB 7: SETTINGS (EVENT NAME & LOGO UPLOAD)
-    // -------------------------------------------------------------------------
+    // TAB 7: SETTINGS
     async function saveSystemSettings(e) {
       e.preventDefault();
       const newGas = document.getElementById('setGasUrl').value.trim();
@@ -1546,9 +1555,7 @@
       });
     }
 
-    // -------------------------------------------------------------------------
-    // AUTH & NAVIGATION HELPERS
-    // -------------------------------------------------------------------------
+    // AUTH & HELPERS
     function openLoginModal() {
       openModal(`
         <h3 class="text-lg font-bold mb-1">เข้าสู่ระบบเจ้าหน้าที่</h3>
@@ -1627,15 +1634,21 @@
       await postApi({ action: 'delete_record', sheet, id_field: idField, id_value: idValue });
     }
 
-    function getSportById(id) { return APP_STATE?.sports.find(s => s.sport_id === id); }
-    function getColorById(id) { return APP_STATE?.colors.find(c => c.color_id === id); }
+    function getSportById(id) { return APP_STATE?.sports.find(s => String(s.sport_id) === String(id)); }
+    function getColorById(id) {
+      const targetId = (typeof id === 'object' && id !== null) ? id.color_id : id;
+      return APP_STATE?.colors.find(c => String(c.color_id) === String(targetId));
+    }
 
     function renderColorPills(ids) {
-      return ids.map(id => {
-        const c = getColorById(id);
-        if (!c) return `<span class="text-xs px-2 py-0.5 bg-slate-200 rounded">${id}</span>`;
-        return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border" style="background:${c.secondary_hex || '#f8fafc'}; border-color:${c.hex_code}40; color:#0f172a">
-          <span class="w-2.5 h-2.5 rounded-full" style="background:${c.hex_code}"></span>${c.color_name}
+      if (!Array.isArray(ids)) return '';
+      return ids.map(item => {
+        const targetId = (typeof item === 'object' && item !== null) ? (item.color_id || item.id) : item;
+        const c = getColorById(targetId);
+        if (!c) return `<span class="text-xs px-2.5 py-0.5 bg-slate-200 text-slate-700 rounded-full font-medium">${targetId || '-'}</span>`;
+        const label = c.color_name || targetId || '-';
+        return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border" style="background:${c.secondary_hex || '#f8fafc'}; border-color:${c.hex_code || '#cbd5e1'}40; color:#0f172a">
+          <span class="w-2.5 h-2.5 rounded-full" style="background:${c.hex_code || '#64748b'}"></span>${label}
         </span>`;
       }).join('');
     }
