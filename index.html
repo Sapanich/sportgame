@@ -1,0 +1,1678 @@
+<!DOCTYPE html>
+<html lang="th" style="font-size: 16px;">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SportG - ระบบบริหารจัดการแข่งขันกีฬาสี Real-Time</title>
+  <!-- Google Fonts: Prompt & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      font-family: 'Prompt', 'Inter', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+    }
+    .nav-btn.active {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    }
+    @media print {
+      .no-print { display: none !important; }
+      body { background: #fff !important; }
+      .glass-card { box-shadow: none !important; border: 1px solid #cbd5e1 !important; }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- TOP HEADER & BRANDING -->
+  <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-lg no-print">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <!-- Logo & Event Name -->
+      <div class="flex items-center gap-3">
+        <div id="brandLogoContainer" class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center overflow-hidden shadow-md shrink-0">
+          <i data-lucide="trophy" class="w-7 h-7 text-slate-900"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 id="headerEventName" class="text-lg md:text-xl font-bold tracking-tight leading-snug">กำลังเชื่อมต่อฐานข้อมูล...</h1>
+            <span id="liveBadge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> LIVE
+            </span>
+          </div>
+          <p id="headerEventSubtitle" class="text-xs text-slate-300">ระบบรายงานผลและคะแนนรวมแบบ Real-Time</p>
+        </div>
+      </div>
+
+      <!-- Right Controls: Year Selector, 5-Level Font Size, Sync, Auth -->
+      <div class="flex flex-wrap items-center gap-2">
+        <!-- Year Selector -->
+        <select id="globalYearSelect" onchange="changeActiveYearView(this.value)" class="bg-slate-800 text-white text-xs md:text-sm rounded-lg px-2.5 py-1.5 border border-slate-700 focus:outline-none focus:border-blue-400">
+          <option value="">ปีการศึกษา...</option>
+        </select>
+
+        <!-- 5-Level Font Size Switcher -->
+        <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700" title="ปรับขนาดตัวอักษรทั้งระบบ 5 ระดับ">
+          <span class="text-xs text-slate-400 px-1.5">ก</span>
+          <button onclick="setFontLevel(1)" data-font-lvl="1" class="font-lvl-btn w-6 h-6 text-xs rounded font-semibold hover:bg-slate-700">1</button>
+          <button onclick="setFontLevel(2)" data-font-lvl="2" class="font-lvl-btn w-6 h-6 text-xs rounded font-semibold hover:bg-slate-700">2</button>
+          <button onclick="setFontLevel(3)" data-font-lvl="3" class="font-lvl-btn w-6 h-6 text-xs rounded font-semibold hover:bg-slate-700">3</button>
+          <button onclick="setFontLevel(4)" data-font-lvl="4" class="font-lvl-btn w-6 h-6 text-xs rounded font-semibold hover:bg-slate-700">4</button>
+          <button onclick="setFontLevel(5)" data-font-lvl="5" class="font-lvl-btn w-6 h-6 text-xs rounded font-semibold hover:bg-slate-700">5</button>
+          <span class="text-sm font-bold text-slate-300 px-1.5">ก+</span>
+        </div>
+
+        <!-- Manual Sync -->
+        <button onclick="fetchState(true)" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 text-slate-200 transition" title="ซิงค์ข้อมูลทันที">
+          <i id="syncIcon" data-lucide="refresh-cw" class="w-4 h-4"></i>
+        </button>
+
+        <!-- User Auth Button -->
+        <div id="authArea">
+          <button onclick="openLoginModal()" class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs md:text-sm font-medium px-3 py-1.5 rounded-lg transition shadow">
+            <i data-lucide="log-in" class="w-4 h-4"></i> เจ้าหน้าที่
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="bg-slate-800/90 border-t border-slate-700/80 overflow-x-auto">
+      <div class="max-w-7xl mx-auto px-4 py-2 flex items-center gap-1.5 min-w-max" id="mainNav">
+        <button onclick="switchTab('dashboard')" data-tab="dashboard" class="nav-btn active flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-slate-200 hover:bg-slate-700 transition">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i> สรุปคะแนนรวม
+        </button>
+        <button onclick="switchTab('schedule')" data-tab="schedule" class="nav-btn flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-slate-200 hover:bg-slate-700 transition">
+          <i data-lucide="calendar-clock" class="w-4 h-4"></i> ตารางแข่งขัน
+        </button>
+        <button onclick="switchTab('scoring')" data-tab="scoring" data-role="ADMIN,ORGANIZER,SCORER" class="nav-btn hidden flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-slate-200 hover:bg-slate-700 transition">
+          <i data-lucide="clipboard-check" class="w-4 h-4"></i> บันทึกผลการแข่งขัน
+        </button>
+        <button onclick="switchTab('reports')" data-tab="reports" class="nav-btn flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-slate-200 hover:bg-slate-700 transition">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i> รายงานสรุปผล
+        </button>
+        <button onclick="switchTab('sports')" data-tab="sports" data-role="ADMIN,ORGANIZER" class="nav-btn hidden flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-slate-200 hover:bg-slate-700 transition">
+          <i data-lucide="medal" class="w-4 h-4"></i> ประเภทกีฬา & เกณฑ์คะแนน
+        </button>
+        <button onclick="switchTab('master')" data-tab="master" data-role="ADMIN" class="nav-btn hidden flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-slate-200 hover:bg-slate-700 transition">
+          <i data-lucide="users-cog" class="w-4 h-4"></i> ปีการศึกษา / สี / ผู้ใช้งาน
+        </button>
+        <button onclick="switchTab('settings')" data-tab="settings" data-role="ADMIN" class="nav-btn hidden flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-slate-200 hover:bg-slate-700 transition">
+          <i data-lucide="settings" class="w-4 h-4"></i> ตั้งค่ารายการ & โลโก้
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6">
+    <!-- Status Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 hidden bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-700 flex items-center gap-2.5 text-sm"></div>
+
+    <!-- ===================================================================
+         TAB 1: DASHBOARD (REAL-TIME OVERALL TROPHY & LIVE MATCHES)
+         =================================================================== -->
+    <section id="tab-dashboard" class="tab-content space-y-6">
+      <!-- Top Summary Cards -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="kpiCards"></div>
+
+      <!-- Overall Trophy Standings -->
+      <div class="glass-card rounded-2xl p-5 md:p-6">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-5">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+              <i data-lucide="trophy" class="w-6 h-6 text-amber-500"></i> ตารางคะแนนถ้วยรางวัลรวม (Overall Standings)
+            </h2>
+            <p class="text-sm text-slate-500">อัปเดตอัตโนมัติทันทีที่มีการบันทึกผลการแข่งขัน • อัปเดตล่าสุด: <span id="lastSyncText">-</span></p>
+          </div>
+        </div>
+        <div id="leaderboardContainer" class="space-y-3"></div>
+      </div>
+
+      <!-- Live & Upcoming Matches -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="glass-card rounded-2xl p-5">
+          <h3 class="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span> กำลังแข่งขัน / คู่ถัดไป
+          </h3>
+          <div id="upcomingMatchesList" class="space-y-3"></div>
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <h3 class="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+            <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600"></i> ผลการแข่งขันล่าสุด
+          </h3>
+          <div id="recentResultsList" class="space-y-3"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         TAB 2: SCHEDULE MANAGEMENT
+         =================================================================== -->
+    <section id="tab-schedule" class="tab-content hidden space-y-5">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">ตารางการแข่งขัน (Match Schedule)</h2>
+          <p class="text-sm text-slate-500">ตรวจสอบวัน เวลา สนามแข่งขัน และคู่แข่งขันทั้งหมด</p>
+        </div>
+        <button id="btnAddSchedule" onclick="openScheduleModal()" class="hidden bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 shadow">
+          <i data-lucide="plus" class="w-4 h-4"></i> เพิ่มตารางแข่งขัน
+        </button>
+      </div>
+
+      <!-- Filters -->
+      <div class="glass-card rounded-xl p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <select id="filterSchedDate" onchange="renderSchedule()" class="border border-slate-300 rounded-lg px-3 py-2 text-sm">
+          <option value="">ทุกวันที่แข่งขัน</option>
+        </select>
+        <select id="filterSchedSport" onchange="renderSchedule()" class="border border-slate-300 rounded-lg px-3 py-2 text-sm">
+          <option value="">ทุกประเภทกีฬา</option>
+        </select>
+        <select id="filterSchedColor" onchange="renderSchedule()" class="border border-slate-300 rounded-lg px-3 py-2 text-sm">
+          <option value="">ทุกคณะสี</option>
+        </select>
+        <select id="filterSchedStatus" onchange="renderSchedule()" class="border border-slate-300 rounded-lg px-3 py-2 text-sm">
+          <option value="">ทุกสถานะ</option>
+          <option value="SCHEDULED">รอแข่งขัน</option>
+          <option value="LIVE">กำลังแข่งขัน</option>
+          <option value="COMPLETED">แข่งเสร็จสิ้น</option>
+        </select>
+      </div>
+
+      <div id="scheduleTableContainer" class="space-y-3"></div>
+    </section>
+
+    <!-- ===================================================================
+         TAB 3: SCORE RECORDING (REFEREE / ADMIN)
+         =================================================================== -->
+    <section id="tab-scoring" class="tab-content hidden space-y-5">
+      <div>
+        <h2 class="text-xl font-bold text-slate-900">บันทึกผลการแข่งขัน (Official Score Recorder)</h2>
+        <p class="text-sm text-slate-500">เลือกรายการแข่งขันเพื่อกรอกคะแนนตามกติกา ระบบจะคำนวณคะแนนถ้วยรางวัลรวมให้อัตโนมัติ</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Match Selector -->
+        <div class="glass-card rounded-2xl p-4 space-y-3">
+          <h3 class="font-bold text-slate-800">1. เลือกรายการแข่งขัน</h3>
+          <input type="text" id="scoreSearchInput" oninput="renderScoringMatchList()" placeholder="ค้นหากีฬา, รอบ, สนาม..." class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+          <div id="scoringMatchList" class="space-y-2 max-h-[550px] overflow-y-auto pr-1"></div>
+        </div>
+
+        <!-- Dynamic Score Form -->
+        <div class="lg:col-span-2 glass-card rounded-2xl p-5" id="scoreFormPanel">
+          <div class="text-center py-16 text-slate-400">
+            <i data-lucide="mouse-pointer-click" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
+            <p>กรุณาเลือกรายการแข่งขันจากแถบด้านซ้ายเพื่อบันทึกผล</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         TAB 4: REPORTS (BY DAY / BY COLOR / BY SPORT)
+         =================================================================== -->
+    <section id="tab-reports" class="tab-content hidden space-y-5">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">รายงานสรุปผลการแข่งขัน (Official Reports)</h2>
+          <p class="text-sm text-slate-500">วิเคราะห์และสรุปผลแยกตามวันที่แข่งขัน คณะสี และประเภทกีฬา</p>
+        </div>
+        <div class="flex items-center gap-2 no-print">
+          <button onclick="exportReportCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-sm font-medium flex items-center gap-1.5">
+            <i data-lucide="download" class="w-4 h-4"></i> ส่งออก CSV
+          </button>
+          <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-900 text-white px-3.5 py-2 rounded-xl text-sm font-medium flex items-center gap-1.5">
+            <i data-lucide="printer" class="w-4 h-4"></i> พิมพ์รายงาน
+          </button>
+        </div>
+      </div>
+
+      <!-- Report Mode Switcher -->
+      <div class="flex flex-wrap gap-2 bg-slate-200/70 p-1.5 rounded-xl w-fit no-print">
+        <button onclick="setReportMode('day')" id="repBtn-day" class="rep-mode-btn bg-white text-blue-700 shadow px-4 py-2 rounded-lg text-sm font-semibold">แยกตามวันแข่งขัน</button>
+        <button onclick="setReportMode('color')" id="repBtn-color" class="rep-mode-btn text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold">แยกตามคณะสี</button>
+        <button onclick="setReportMode('sport')" id="repBtn-sport" class="rep-mode-btn text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold">แยกตามประเภทกีฬา</button>
+      </div>
+
+      <div id="reportFilterBar" class="no-print"></div>
+      <div id="reportOutputArea" class="space-y-4"></div>
+    </section>
+
+    <!-- ===================================================================
+         TAB 5: SPORTS & SCORING RULES CONFIG
+         =================================================================== -->
+    <section id="tab-sports" class="tab-content hidden space-y-5">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">จัดการประเภทกีฬา กติกาสากล และคะแนนถ้วยรางวัลรวม</h2>
+          <p class="text-sm text-slate-500">กำหนดรูปแบบการนับคะแนน (สากล / กำหนดเอง) และแต้มที่จะนำไปรวมในถ้วยรางวัลใหญ่</p>
+        </div>
+        <button onclick="openSportModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 shadow">
+          <i data-lucide="plus" class="w-4 h-4"></i> เพิ่มประเภทกีฬา
+        </button>
+      </div>
+      <div id="sportsListContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    </section>
+
+    <!-- ===================================================================
+         TAB 6: MASTER DATA (YEARS, COLORS, USERS & ASSIGNMENTS)
+         =================================================================== -->
+    <section id="tab-master" class="tab-content hidden space-y-6">
+      <!-- Years -->
+      <div class="glass-card rounded-2xl p-5 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-bold text-slate-900">1. จัดการข้อมูลปีการศึกษา (Academic Years)</h3>
+          <button onclick="openYearModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium">+ เพิ่มปีการศึกษา</button>
+        </div>
+        <div id="yearsListContainer" class="grid grid-cols-1 md:grid-cols-3 gap-3"></div>
+      </div>
+
+      <!-- Colors -->
+      <div class="glass-card rounded-2xl p-5 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-bold text-slate-900">2. จัดการคณะสี (Teams / Colors)</h3>
+          <button onclick="openColorModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium">+ เพิ่มคณะสี</button>
+        </div>
+        <div id="colorsListContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"></div>
+      </div>
+
+      <!-- Users & Assignments -->
+      <div class="glass-card rounded-2xl p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h3 class="text-lg font-bold text-slate-900">3. จัดการผู้ใช้งานและสิทธิ์กรรมการ (Users & Assignments)</h3>
+          <div class="flex gap-2">
+            <button onclick="openUserModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium">+ เพิ่มผู้ใช้งาน</button>
+            <button onclick="openAssignModal()" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium">+ มอบหมายสิทธิ์กีฬา/สนาม</button>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left border-collapse">
+            <thead class="bg-slate-100 text-slate-700">
+              <tr>
+                <th class="p-3 rounded-tl-lg">ชื่อ-สกุล</th>
+                <th class="p-3">Username</th>
+                <th class="p-3">บทบาท (Role)</th>
+                <th class="p-3">สิทธิ์กีฬา / สนามที่รับผิดชอบ</th>
+                <th class="p-3 rounded-tr-lg text-right">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody" class="divide-y divide-slate-200"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         TAB 7: EVENT BRANDING & API CONNECTION SETTINGS
+         =================================================================== -->
+    <section id="tab-settings" class="tab-content hidden max-w-3xl mx-auto">
+      <div class="glass-card rounded-2xl p-6 space-y-5">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">ตั้งค่าชื่อรายการแข่งขัน โลโก้ และการเชื่อมต่อ Google Sheet</h2>
+          <p class="text-sm text-slate-500">ข้อมูลชื่อรายการและโลโก้จะถูกบันทึกลงในแท็บ settings ของ Google Sheet และแสดงผลทุกเครื่องทันที</p>
+        </div>
+
+        <form onsubmit="saveSystemSettings(event)" class="space-y-4">
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1">ชื่อรายการแข่งขัน (Event Name)</label>
+            <input type="text" id="setEventName" required class="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1">คำบรรยายใต้ชื่อรายการ (Subtitle)</label>
+            <input type="text" id="setEventSubtitle" class="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm">
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">ลิงก์โลโก้ (Logo URL)</label>
+              <input type="url" id="setLogoUrl" placeholder="https://..." class="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">หรืออัปโหลดไฟล์โลโก้ใหม่ (PNG/JPG)</label>
+              <input type="file" id="setLogoFile" accept="image/*" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-white">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">รอบการอัปเดต Real-Time (วินาที)</label>
+              <input type="number" id="setRefreshSec" min="3" max="60" value="8" class="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">Google Apps Script Web App URL</label>
+              <input type="url" id="setGasUrl" required class="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-mono text-xs">
+            </div>
+          </div>
+
+          <div class="pt-2 flex justify-end">
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-xl shadow flex items-center gap-2">
+              <i data-lucide="save" class="w-4 h-4"></i> บันทึกการตั้งค่าลง Google Sheet
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- UNIVERSAL MODAL CONTAINER -->
+  <div id="modalBackdrop" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div id="modalBox" class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto"></div>
+  </div>
+
+  <!-- ===================================================================
+       JAVASCRIPT APPLICATION ENGINE
+       =================================================================== -->
+  <script>
+    // ใส่ Web App URL จาก Google Apps Script ที่ Deploy แล้วตรงนี้
+    const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbwqqZ2jtbIQm_wchphx0HvKr4IWPzuJb2q-FaXsIJtzqEFm2mXEoaEh-2AtMo09QeND/exec';
+
+    let GAS_URL = localStorage.getItem('sportg_gas_url') || DEFAULT_GAS_URL;
+    let APP_STATE = null;
+    let CURRENT_HASH = '';
+    let SELECTED_YEAR_ID = '';
+    let CURRENT_USER = JSON.parse(localStorage.getItem('sportg_user') || 'null');
+    let USER_ASSIGNMENTS = JSON.parse(localStorage.getItem('sportg_assignments') || '[]');
+    let POLL_TIMER = null;
+    let REPORT_MODE = 'day';
+
+    // กติกามาตรฐานสากลสำเร็จรูป (International Presets)
+    const SPORT_PRESETS = {
+      STD_FOOTBALL: {
+        label: 'ฟุตบอล / ฟุตซอล (มาตรฐานสากล - นับประตู + จุดโทษ)',
+        mode: 'GOALS_POINTS',
+        config: { halves: 2, duration_min: 45, allow_penalty: true, unit: 'ประตู' },
+        points: { "1": 15, "2": 10, "3": 7, "4": 5, "WIN": 3, "DRAW": 1, "LOSS": 0 }
+      },
+      STD_VOLLEYBALL: {
+        label: 'วอลเลย์บอล (มาตรฐานสากล FIVB - ชนะ 2 ใน 3 หรือ 3 ใน 5 เซต)',
+        mode: 'SETS',
+        config: { best_of: 3, set_points: 25, tiebreak_points: 15, unit: 'เซต' },
+        points: { "1": 15, "2": 10, "3": 7, "4": 5, "WIN": 3, "DRAW": 0, "LOSS": 0 }
+      },
+      STD_BASKETBALL: {
+        label: 'บาสเกตบอล (มาตรฐานสากล FIBA - 4 ควอเตอร์ นับแต้มรวม)',
+        mode: 'GOALS_POINTS',
+        config: { quarters: 4, duration_min: 10, allow_penalty: false, unit: 'แต้ม' },
+        points: { "1": 15, "2": 10, "3": 7, "4": 5, "WIN": 2, "DRAW": 0, "LOSS": 1 }
+      },
+      STD_BADMINTON: {
+        label: 'แบดมินตัน / เทเบิลเทนนิส (มาตรฐานสากล BWF/ITTF - ระบบเกม)',
+        mode: 'SETS',
+        config: { best_of: 3, set_points: 21, tiebreak_points: 21, unit: 'เกม' },
+        points: { "1": 12, "2": 8, "3": 5, "4": 3, "WIN": 2, "DRAW": 0, "LOSS": 0 }
+      },
+      STD_ATHLETICS_TIME: {
+        label: 'กรีฑาลู่ / ว่ายน้ำ (มาตรฐานสากล WA - จับเวลา น้อยสุดชนะ)',
+        mode: 'RANK_TIME',
+        config: { sort_order: 'ASC', unit: 'วินาที' },
+        points: { "1": 10, "2": 7, "3": 5, "4": 3 }
+      },
+      STD_ATHLETICS_DIST: {
+        label: 'กรีฑาลาน ทุ่ม/พุ่ง/กระโดด (มาตรฐานสากล - สถิติสูงสุดชนะ)',
+        mode: 'RANK_DIST',
+        config: { sort_order: 'DESC', unit: 'เมตร' },
+        points: { "1": 10, "2": 7, "3": 5, "4": 3 }
+      },
+      CUSTOM: {
+        label: 'กำหนดกติกาและเกณฑ์คะแนนเอง (Custom Rule)',
+        mode: 'CUSTOM_SCORE',
+        config: { sort_order: 'DESC', unit: 'คะแนน' },
+        points: { "1": 10, "2": 7, "3": 5, "4": 3 }
+      }
+    };
+
+    // -------------------------------------------------------------------------
+    // INITIALIZATION & 5-LEVEL FONT SCALING
+    // -------------------------------------------------------------------------
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedFontLvl = Number(localStorage.getItem('sportg_font_level') || 3);
+      setFontLevel(savedFontLvl);
+      updateAuthUI();
+      lucide.createIcons();
+
+      if (GAS_URL.includes('YOUR_SCRIPT_DEPLOYMENT_ID')) {
+        promptSetupGasUrl();
+      } else {
+        fetchState(true);
+      }
+    });
+
+    function setFontLevel(level) {
+      const sizes = { 1: '13px', 2: '14.5px', 3: '16px', 4: '18px', 5: '20px' };
+      document.documentElement.style.fontSize = sizes[level] || '16px';
+      localStorage.setItem('sportg_font_level', level);
+      document.querySelectorAll('.font-lvl-btn').forEach(btn => {
+        const isActive = Number(btn.dataset.fontLvl) === level;
+        btn.classList.toggle('bg-blue-600', isActive);
+        btn.classList.toggle('text-white', isActive);
+      });
+    }
+
+    function promptSetupGasUrl() {
+      openModal(`
+        <h3 class="text-lg font-bold text-slate-900 mb-2">ตั้งค่าการเชื่อมต่อ Google Apps Script</h3>
+        <p class="text-sm text-slate-600 mb-4">กรุณาวาง Web App URL ที่ได้จากการ Deploy โค้ด Google Apps Script (ลงท้ายด้วย /exec)</p>
+        <input type="url" id="initGasInput" placeholder="https://script.google.com/macros/s/.../exec" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm mb-4">
+        <button onclick="saveInitGasUrl()" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-xl">เชื่อมต่อฐานข้อมูล</button>
+      `);
+    }
+
+    function saveInitGasUrl() {
+      const val = document.getElementById('initGasInput').value.trim();
+      if (!val) return;
+      GAS_URL = val;
+      localStorage.setItem('sportg_gas_url', val);
+      closeModal();
+      fetchState(true);
+    }
+
+    // -------------------------------------------------------------------------
+    // REAL-TIME DATA SYNC ENGINE
+    // -------------------------------------------------------------------------
+    async function fetchState(forceRender = false) {
+      const syncIcon = document.getElementById('syncIcon');
+      if (syncIcon) syncIcon.classList.add('animate-spin');
+      try {
+        const url = `${GAS_URL}?action=get_state${SELECTED_YEAR_ID ? '&year_id=' + SELECTED_YEAR_ID : ''}`;
+        const res = await fetch(url);
+        const json = await res.json();
+        if (json.status === 'success') {
+          const newData = json.data;
+          if (forceRender || newData.version_hash !== CURRENT_HASH) {
+            APP_STATE = newData;
+            CURRENT_HASH = newData.version_hash;
+            if (!SELECTED_YEAR_ID) SELECTED_YEAR_ID = newData.active_year_id;
+            renderAll();
+          }
+          document.getElementById('lastSyncText').textContent = new Date().toLocaleTimeString('th-TH');
+          setupPolling(Number(newData.settings.refresh_interval_sec || 8));
+        }
+      } catch (err) {
+        console.error('Sync error:', err);
+      } finally {
+        if (syncIcon) syncIcon.classList.remove('animate-spin');
+      }
+    }
+
+    function setupPolling(seconds) {
+      if (POLL_TIMER) clearInterval(POLL_TIMER);
+      POLL_TIMER = setInterval(() => fetchState(false), Math.max(4, seconds) * 1000);
+    }
+
+    async function postApi(payload) {
+      showToast('กำลังบันทึกข้อมูลลง Google Sheet...');
+      const res = await fetch(GAS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+      const json = await res.json();
+      if (json.status === 'success') {
+        showToast('บันทึกข้อมูลสำเร็จ!', 'success');
+        await fetchState(true);
+      } else {
+        showToast('เกิดข้อผิดพลาด: ' + json.message, 'error');
+      }
+      return json;
+    }
+
+    // -------------------------------------------------------------------------
+    // MASTER RENDERER
+    // -------------------------------------------------------------------------
+    function renderAll() {
+      if (!APP_STATE) return;
+      const { settings, years, active_year_id } = APP_STATE;
+
+      // Branding
+      document.getElementById('headerEventName').textContent = settings.event_name || 'SportG Arena';
+      document.getElementById('headerEventSubtitle').textContent = settings.event_subtitle || '';
+      const logoBox = document.getElementById('brandLogoContainer');
+      if (settings.logo_url) {
+        logoBox.innerHTML = `<img src="${settings.logo_url}" alt="Logo" class="w-full h-full object-cover">`;
+      }
+
+      // Year Dropdown
+      const yrSelect = document.getElementById('globalYearSelect');
+      yrSelect.innerHTML = years.map(y =>
+        `<option value="${y.year_id}" ${y.year_id === active_year_id ? 'selected' : ''}>${y.year_name}</option>`
+      ).join('');
+
+      // Populate Settings Form
+      if (document.getElementById('setEventName')) {
+        document.getElementById('setEventName').value = settings.event_name || '';
+        document.getElementById('setEventSubtitle').value = settings.event_subtitle || '';
+        document.getElementById('setLogoUrl').value = settings.logo_url || '';
+        document.getElementById('setRefreshSec').value = settings.refresh_interval_sec || 8;
+        document.getElementById('setGasUrl').value = GAS_URL;
+      }
+
+      renderDashboard();
+      populateScheduleFilters();
+      renderSchedule();
+      renderScoringMatchList();
+      renderReports();
+      renderSportsTab();
+      renderMasterTab();
+      lucide.createIcons();
+    }
+
+    function changeActiveYearView(yrId) {
+      SELECTED_YEAR_ID = yrId;
+      fetchState(true);
+    }
+
+    // -------------------------------------------------------------------------
+    // TAB 1: DASHBOARD
+    // -------------------------------------------------------------------------
+    function renderDashboard() {
+      const { leaderboard, schedules, results, sports, colors } = APP_STATE;
+      const completedCount = schedules.filter(s => s.status === 'COMPLETED').length;
+      const liveCount = schedules.filter(s => s.status === 'LIVE').length;
+
+      document.getElementById('kpiCards').innerHTML = `
+        <div class="glass-card rounded-2xl p-4">
+          <p class="text-xs text-slate-500 font-medium">คณะสีที่เข้าร่วม</p>
+          <p class="text-2xl font-extrabold text-slate-900 mt-1">${colors.length} <span class="text-sm font-normal text-slate-500">สี</span></p>
+        </div>
+        <div class="glass-card rounded-2xl p-4">
+          <p class="text-xs text-slate-500 font-medium">ประเภทกีฬาทั้งหมด</p>
+          <p class="text-2xl font-extrabold text-blue-600 mt-1">${sports.length} <span class="text-sm font-normal text-slate-500">รายการ</span></p>
+        </div>
+        <div class="glass-card rounded-2xl p-4">
+          <p class="text-xs text-slate-500 font-medium">แข่งขันเสร็จสิ้น</p>
+          <p class="text-2xl font-extrabold text-emerald-600 mt-1">${completedCount} / ${schedules.length} <span class="text-sm font-normal text-slate-500">แมตช์</span></p>
+        </div>
+        <div class="glass-card rounded-2xl p-4">
+          <p class="text-xs text-slate-500 font-medium">กำลังแข่งขันสด</p>
+          <p class="text-2xl font-extrabold text-rose-600 mt-1">${liveCount} <span class="text-sm font-normal text-slate-500">สนาม</span></p>
+        </div>
+      `;
+
+      const maxPts = Math.max(1, ...leaderboard.map(c => c.total_points));
+      document.getElementById('leaderboardContainer').innerHTML = leaderboard.map((c, idx) => {
+        const pct = Math.round((c.total_points / maxPts) * 100);
+        const rankBadge = idx === 0 ? '🥇 อันดับ 1' : idx === 1 ? '🥈 อันดับ 2' : idx === 2 ? '🥉 อันดับ 3' : `อันดับ ${idx + 1}`;
+        return `
+          <div class="p-4 rounded-xl border border-slate-200 bg-white hover:shadow-md transition">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <div class="flex items-center gap-3">
+                <span class="w-4 h-10 rounded-full shrink-0" style="background:${c.hex_code}"></span>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">${rankBadge}</span>
+                    <h4 class="font-bold text-base text-slate-900">${c.color_name}</h4>
+                  </div>
+                  <p class="text-xs text-slate-500">${c.motto || ''}</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2 text-xs font-semibold">
+                  <span class="px-2 py-1 rounded bg-amber-100 text-amber-800">🥇 ${c.gold}</span>
+                  <span class="px-2 py-1 rounded bg-slate-200 text-slate-700">🥈 ${c.silver}</span>
+                  <span class="px-2 py-1 rounded bg-orange-100 text-orange-800">🥉 ${c.bronze}</span>
+                </div>
+                <div class="text-right">
+                  <span class="text-2xl font-extrabold text-slate-900">${c.total_points}</span>
+                  <span class="text-xs text-slate-500 block">คะแนนรวม</span>
+                </div>
+              </div>
+            </div>
+            <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+              <div class="h-full rounded-full transition-all duration-700" style="width:${pct}%; background:${c.hex_code}"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Upcoming & Live
+      const upcoming = schedules.filter(s => s.status !== 'COMPLETED').slice(0, 5);
+      document.getElementById('upcomingMatchesList').innerHTML = upcoming.length
+        ? upcoming.map(sc => renderMatchCardCompact(sc)).join('')
+        : '<p class="text-sm text-slate-400 py-4 text-center">ไม่มีรายการที่รอแข่งขัน</p>';
+
+      // Recent Results
+      const recent = [...results].reverse().slice(0, 5);
+      document.getElementById('recentResultsList').innerHTML = recent.length
+        ? recent.map(r => renderResultCardCompact(r)).join('')
+        : '<p class="text-sm text-slate-400 py-4 text-center">ยังไม่มีผลการแข่งขันที่บันทึก</p>';
+    }
+
+    function renderMatchCardCompact(sc) {
+      const sport = getSportById(sc.sport_id);
+      const pIds = safeJson(sc.participants_json, []);
+      const badge = sc.status === 'LIVE'
+        ? '<span class="px-2 py-0.5 text-xs font-bold rounded bg-rose-100 text-rose-700">LIVE</span>'
+        : '<span class="px-2 py-0.5 text-xs font-semibold rounded bg-blue-50 text-blue-700">รอแข่ง</span>';
+      return `
+        <div class="p-3 rounded-xl border border-slate-200 bg-slate-50/70 flex items-center justify-between gap-2">
+          <div>
+            <div class="flex items-center gap-2">
+              ${badge}
+              <span class="font-bold text-sm text-slate-900">${sport ? sport.sport_name : sc.sport_id}</span>
+              <span class="text-xs text-slate-500">(${sc.round_name})</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mt-1.5">${renderColorPills(pIds)}</div>
+          </div>
+          <div class="text-right text-xs text-slate-600 shrink-0">
+            <div class="font-semibold">${sc.match_date}</div>
+            <div>${sc.start_time} น. • ${sc.venue}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderResultCardCompact(res) {
+      const sport = getSportById(res.sport_id);
+      const sc = APP_STATE.schedules.find(s => s.schedule_id === res.schedule_id);
+      const rankings = safeJson(res.rankings_json, []);
+      return `
+        <div class="p-3 rounded-xl border border-emerald-200 bg-emerald-50/40">
+          <div class="flex items-center justify-between text-sm font-bold text-slate-900 mb-1.5">
+            <span>${sport ? sport.sport_name : res.sport_id} <span class="text-xs font-normal text-slate-500">(${sc ? sc.round_name : ''})</span></span>
+            <span class="text-xs text-emerald-700">บันทึกผลแล้ว</span>
+          </div>
+          <div class="space-y-1">
+            ${rankings.map(rk => {
+              const col = getColorById(rk.color_id);
+              return `
+                <div class="flex items-center justify-between text-xs bg-white px-2.5 py-1 rounded border border-slate-100">
+                  <span class="flex items-center gap-1.5 font-semibold">
+                    <span class="w-2.5 h-2.5 rounded-full" style="background:${col ? col.hex_code : '#999'}"></span>
+                    อันดับ ${rk.rank}: ${col ? col.color_name : rk.color_id}
+                  </span>
+                  <span class="font-mono font-bold text-slate-800">${rk.score_display || ''}</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    // -------------------------------------------------------------------------
+    // TAB 2: SCHEDULE
+    // -------------------------------------------------------------------------
+    function populateScheduleFilters() {
+      const dates = [...new Set(APP_STATE.schedules.map(s => s.match_date))].sort();
+      document.getElementById('filterSchedDate').innerHTML = '<option value="">ทุกวันที่แข่งขัน</option>' +
+        dates.map(d => `<option value="${d}">${d}</option>`).join('');
+      document.getElementById('filterSchedSport').innerHTML = '<option value="">ทุกประเภทกีฬา</option>' +
+        APP_STATE.sports.map(s => `<option value="${s.sport_id}">${s.sport_name}</option>`).join('');
+      document.getElementById('filterSchedColor').innerHTML = '<option value="">ทุกคณะสี</option>' +
+        APP_STATE.colors.map(c => `<option value="${c.color_id}">${c.color_name}</option>`).join('');
+    }
+
+    function renderSchedule() {
+      const dVal = document.getElementById('filterSchedDate').value;
+      const sVal = document.getElementById('filterSchedSport').value;
+      const cVal = document.getElementById('filterSchedColor').value;
+      const stVal = document.getElementById('filterSchedStatus').value;
+
+      const list = APP_STATE.schedules.filter(sc => {
+        if (dVal && sc.match_date !== dVal) return false;
+        if (sVal && sc.sport_id !== sVal) return false;
+        if (stVal && sc.status !== stVal) return false;
+        if (cVal && !safeJson(sc.participants_json, []).includes(cVal)) return false;
+        return true;
+      });
+
+      const canEdit = CURRENT_USER && ['ADMIN', 'ORGANIZER'].includes(CURRENT_USER.role);
+      document.getElementById('btnAddSchedule').classList.toggle('hidden', !canEdit);
+
+      document.getElementById('scheduleTableContainer').innerHTML = list.length ? list.map(sc => {
+        const sport = getSportById(sc.sport_id);
+        const pIds = safeJson(sc.participants_json, []);
+        const statusMap = {
+          SCHEDULED: '<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">รอแข่งขัน</span>',
+          LIVE: '<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700 animate-pulse">กำลังแข่งขัน</span>',
+          COMPLETED: '<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">เสร็จสิ้น</span>'
+        };
+        return `
+          <div class="glass-card rounded-xl p-4 flex flex-wrap items-center justify-between gap-4">
+            <div class="space-y-1">
+              <div class="flex flex-wrap items-center gap-2">
+                ${statusMap[sc.status] || sc.status}
+                <span class="font-bold text-base text-slate-900">${sport ? sport.sport_name : sc.sport_id}</span>
+                <span class="text-xs bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-medium">${sc.round_name}</span>
+              </div>
+              <div class="flex flex-wrap items-center gap-2 pt-1">${renderColorPills(pIds)}</div>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="text-right text-sm">
+                <div class="font-semibold text-slate-800">📅 ${sc.match_date} | ⏰ ${sc.start_time} - ${sc.end_time}</div>
+                <div class="text-xs text-slate-500">📍 สนาม: ${sc.venue}</div>
+              </div>
+              ${canEdit ? `
+                <div class="flex gap-1">
+                  <button onclick="openScheduleModal('${sc.schedule_id}')" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                  <button onclick="deleteRecord('schedule','schedule_id','${sc.schedule_id}')" class="p-2 text-rose-600 hover:bg-rose-50 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('') : '<div class="glass-card rounded-xl p-8 text-center text-slate-400">ไม่พบรายการแข่งขันตามเงื่อนไขที่เลือก</div>';
+      lucide.createIcons();
+    }
+
+    // -------------------------------------------------------------------------
+    // TAB 3: SCORE RECORDING (DYNAMIC BY SPORT RULE)
+    // -------------------------------------------------------------------------
+    function renderScoringMatchList() {
+      const q = (document.getElementById('scoreSearchInput')?.value || '').toLowerCase();
+      const allowedSchedules = APP_STATE.schedules.filter(sc => {
+        if (!CURRENT_USER) return false;
+        if (CURRENT_USER.role === 'ADMIN' || CURRENT_USER.role === 'ORGANIZER') return true;
+        // ตรวจสอบสิทธิ์ตามตาราง assignments
+        return USER_ASSIGNMENTS.some(a =>
+          (a.sport_id === 'ALL' || a.sport_id === sc.sport_id) &&
+          (a.venue === 'ALL' || a.venue === sc.venue) &&
+          String(a.can_record_score).toUpperCase() === 'TRUE'
+        );
+      }).filter(sc => {
+        const sport = getSportById(sc.sport_id);
+        const text = `${sport?.sport_name || ''} ${sc.round_name} ${sc.venue}`.toLowerCase();
+        return text.includes(q);
+      });
+
+      document.getElementById('scoringMatchList').innerHTML = allowedSchedules.map(sc => {
+        const sport = getSportById(sc.sport_id);
+        const isDone = sc.status === 'COMPLETED';
+        return `
+          <button onclick="loadScoreForm('${sc.schedule_id}')" class="w-full text-left p-3 rounded-xl border ${isDone ? 'border-emerald-200 bg-emerald-50/40' : 'border-slate-200 bg-white'} hover:border-blue-500 transition">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-sm text-slate-900">${sport ? sport.sport_name : sc.sport_id}</span>
+              <span class="text-xs px-2 py-0.5 rounded ${isDone ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}">${isDone ? 'บันทึกแล้ว' : 'รอบันทึก'}</span>
+            </div>
+            <div class="text-xs text-slate-500 mt-1">${sc.round_name} • ${sc.match_date} (${sc.start_time})</div>
+          </button>
+        `;
+      }).join('') || '<p class="text-sm text-slate-400 text-center py-6">ไม่มีรายการที่ได้รับมอบหมาย</p>';
+    }
+
+    function loadScoreForm(scheduleId) {
+      const sc = APP_STATE.schedules.find(s => s.schedule_id === scheduleId);
+      const sport = getSportById(sc.sport_id);
+      const existingRes = APP_STATE.results.find(r => r.schedule_id === scheduleId);
+      const pIds = safeJson(sc.participants_json, []);
+      const ruleCfg = safeJson(sport.rule_config_json, {});
+      const trophyPts = safeJson(sport.trophy_points_json, {});
+      const prevScores = existingRes ? safeJson(existingRes.scores_detail_json, {}) : {};
+
+      const isFinalDefault = sc.round_name.includes('ชิง') || pIds.length > 2;
+
+      document.getElementById('scoreFormPanel').innerHTML = `
+        <form onsubmit="submitMatchResult(event, '${sc.schedule_id}')" class="space-y-5">
+          <div class="border-b border-slate-200 pb-3 flex flex-wrap justify-between items-center gap-2">
+            <div>
+              <span class="text-xs font-bold uppercase text-blue-600">${sport.category} • ${sport.scoring_mode}</span>
+              <h3 class="text-lg font-bold text-slate-900">${sport.sport_name} (${sc.round_name})</h3>
+              <p class="text-xs text-slate-500">วันที่ ${sc.match_date} เวลา ${sc.start_time} น. • สนาม ${sc.venue}</p>
+            </div>
+            <label class="flex items-center gap-2 bg-amber-50 border border-amber-200 px-3 py-2 rounded-xl text-xs font-semibold text-amber-900 cursor-pointer">
+              <input type="checkbox" id="isFinalRoundCheck" ${isFinalDefault ? 'checked' : ''} onchange="recalcScorePreview('${sc.schedule_id}')">
+              รอบชิงอันดับ / นับเหรียญรางวัล
+            </label>
+          </div>
+
+          <div class="space-y-3" id="participantScoreRows">
+            ${pIds.map((colId, idx) => {
+              const col = getColorById(colId);
+              const saved = prevScores[colId] || {};
+              return `
+                <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2 font-bold text-slate-900">
+                      <span class="w-4 h-4 rounded-full" style="background:${col.hex_code}"></span>
+                      ${col.color_name}
+                    </div>
+                    <span id="previewPts_${colId}" class="text-xs font-bold px-2.5 py-1 rounded-lg bg-blue-100 text-blue-800">+0 คะแนนถ้วยรวม</span>
+                  </div>
+                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div>
+                      <label class="block text-xs text-slate-500 mb-1">คะแนน/สกอร์ (${ruleCfg.unit || 'แต้ม'})</label>
+                      <input type="number" step="any" data-col="${colId}" data-field="main_score" value="${saved.main_score ?? ''}" oninput="recalcScorePreview('${sc.schedule_id}')" required class="score-input w-full border border-slate-300 rounded-lg px-2.5 py-1.5 text-sm font-bold">
+                    </div>
+                    ${sport.scoring_mode === 'SETS' ? `
+                      <div class="col-span-2">
+                        <label class="block text-xs text-slate-500 mb-1">รายละเอียดรายเซต (เช่น 25-20, 25-18)</label>
+                        <input type="text" data-col="${colId}" data-field="set_detail" value="${saved.set_detail ?? ''}" placeholder="25-21, 22-25, 15-10" class="score-input w-full border border-slate-300 rounded-lg px-2.5 py-1.5 text-sm">
+                      </div>
+                    ` : ''}
+                    ${ruleCfg.allow_penalty ? `
+                      <div>
+                        <label class="block text-xs text-slate-500 mb-1">จุดโทษ (ถ้ามี)</label>
+                        <input type="number" data-col="${colId}" data-field="penalty" value="${saved.penalty ?? ''}" oninput="recalcScorePreview('${sc.schedule_id}')" class="score-input w-full border border-slate-300 rounded-lg px-2.5 py-1.5 text-sm">
+                      </div>
+                    ` : ''}
+                    <div>
+                      <label class="block text-xs text-slate-500 mb-1">อันดับที่ได้ (Rank)</label>
+                      <select data-col="${colId}" data-field="manual_rank" onchange="recalcScorePreview('${sc.schedule_id}')" class="score-input w-full border border-slate-300 rounded-lg px-2.5 py-1.5 text-sm font-semibold">
+                        <option value="AUTO">คำนวณอัตโนมัติ</option>
+                        ${[1,2,3,4,5,6].map(r => `<option value="${r}" ${Number(saved.manual_rank) === r ? 'selected' : ''}>อันดับ ${r}</option>`).join('')}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+            <select id="matchStatusSelect" class="border border-slate-300 rounded-xl px-3 py-2 text-sm font-medium">
+              <option value="COMPLETED" ${sc.status === 'COMPLETED' ? 'selected' : ''}>สถานะ: แข่งขันเสร็จสิ้น (ยืนยันผล)</option>
+              <option value="LIVE" ${sc.status === 'LIVE' ? 'selected' : ''}>สถานะ: กำลังแข่งขัน (Live Score)</option>
+            </select>
+            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl shadow flex items-center gap-2">
+              <i data-lucide="check-circle" class="w-5 h-5"></i> บันทึกผลการแข่งขัน
+            </button>
+          </div>
+        </form>
+      `;
+      lucide.createIcons();
+      recalcScorePreview(scheduleId);
+    }
+
+    function computeMatchOutcome(scheduleId) {
+      const sc = APP_STATE.schedules.find(s => s.schedule_id === scheduleId);
+      const sport = getSportById(sc.sport_id);
+      const ruleCfg = safeJson(sport.rule_config_json, {});
+      const trophyPts = safeJson(sport.trophy_points_json, {});
+      const mult = Number(sport.weight_multiplier || 1);
+      const isFinal = document.getElementById('isFinalRoundCheck')?.checked;
+      const pIds = safeJson(sc.participants_json, []);
+
+      const scoresDetail = {};
+      pIds.forEach(colId => { scoresDetail[colId] = {}; });
+      document.querySelectorAll('.score-input').forEach(inp => {
+        scoresDetail[inp.dataset.col][inp.dataset.field] = inp.value;
+      });
+
+      // จัดอันดับ
+      const items = pIds.map(colId => {
+        const d = scoresDetail[colId];
+        return {
+          color_id: colId,
+          main: Number(d.main_score || 0),
+          pen: Number(d.penalty || 0),
+          manual_rank: d.manual_rank,
+          set_detail: d.set_detail || ''
+        };
+      });
+
+      const isAsc = ruleCfg.sort_order === 'ASC';
+      items.sort((a, b) => {
+        if (a.manual_rank !== 'AUTO' && b.manual_rank !== 'AUTO') return Number(a.manual_rank) - Number(b.manual_rank);
+        if (a.main !== b.main) return isAsc ? a.main - b.main : b.main - a.main;
+        return b.pen - a.pen;
+      });
+
+      const isDraw = items.length === 2 && items[0].main === items[1].main && items[0].pen === items[1].pen && items[0].manual_rank === 'AUTO';
+      const rankings = [];
+      const trophyAwarded = {};
+
+      items.forEach((it, idx) => {
+        const rank = it.manual_rank !== 'AUTO' ? Number(it.manual_rank) : (isDraw ? 1 : idx + 1);
+        let pts = 0;
+        if (isFinal) {
+          pts = Number(trophyPts[String(rank)] || trophyPts['PARTICIPATE'] || 0) * mult;
+        } else if (items.length === 2) {
+          if (isDraw) pts = Number(trophyPts['DRAW'] || 0) * mult;
+          else pts = Number(rank === 1 ? (trophyPts['WIN'] || trophyPts['1'] || 0) : (trophyPts['LOSS'] || 0)) * mult;
+        } else {
+          pts = Number(trophyPts[String(rank)] || 0) * mult;
+        }
+
+        trophyAwarded[it.color_id] = pts;
+        const penTxt = it.pen ? ` (จุดโทษ ${it.pen})` : '';
+        const setTxt = it.set_detail ? ` [${it.set_detail}]` : '';
+        rankings.push({
+          color_id: it.color_id,
+          rank: rank,
+          is_final: isFinal,
+          score_display: `${it.main} ${ruleCfg.unit || ''}${penTxt}${setTxt}`
+        });
+      });
+
+      return { scoresDetail, rankings, trophyAwarded };
+    }
+
+    function recalcScorePreview(scheduleId) {
+      const { trophyAwarded } = computeMatchOutcome(scheduleId);
+      Object.keys(trophyAwarded).forEach(colId => {
+        const el = document.getElementById(`previewPts_${colId}`);
+        if (el) el.textContent = `+${trophyAwarded[colId]} คะแนนถ้วยรวม`;
+      });
+    }
+
+    async function submitMatchResult(e, scheduleId) {
+      e.preventDefault();
+      const sc = APP_STATE.schedules.find(s => s.schedule_id === scheduleId);
+      const existingRes = APP_STATE.results.find(r => r.schedule_id === scheduleId);
+      const { scoresDetail, rankings, trophyAwarded } = computeMatchOutcome(scheduleId);
+      const status = document.getElementById('matchStatusSelect').value;
+
+      await postApi({
+        action: 'save_result',
+        schedule_status: status,
+        result: {
+          result_id: existingRes ? existingRes.result_id : '',
+          schedule_id: scheduleId,
+          year_id: APP_STATE.active_year_id,
+          sport_id: sc.sport_id,
+          scores_detail_json: JSON.stringify(scoresDetail),
+          rankings_json: JSON.stringify(rankings),
+          trophy_awarded_json: JSON.stringify(trophyAwarded),
+          recorded_by: CURRENT_USER ? CURRENT_USER.full_name : 'Admin'
+        }
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // TAB 4: REPORTS (BY DAY / COLOR / SPORT)
+    // -------------------------------------------------------------------------
+    function setReportMode(mode) {
+      REPORT_MODE = mode;
+      document.querySelectorAll('.rep-mode-btn').forEach(btn => {
+        btn.classList.remove('bg-white', 'text-blue-700', 'shadow');
+        btn.classList.add('text-slate-700');
+      });
+      const active = document.getElementById(`repBtn-${mode}`);
+      active.classList.add('bg-white', 'text-blue-700', 'shadow');
+      active.classList.remove('text-slate-700');
+      renderReports();
+    }
+
+    function renderReports() {
+      const out = document.getElementById('reportOutputArea');
+      const { results, schedules, sports, colors } = APP_STATE;
+
+      if (REPORT_MODE === 'day') {
+        const dates = [...new Set(schedules.map(s => s.match_date))].sort();
+        out.innerHTML = dates.map(date => {
+          const daySchedules = schedules.filter(s => s.match_date === date);
+          return `
+            <div class="glass-card rounded-2xl p-5 space-y-3">
+              <h3 class="text-lg font-bold text-slate-900 border-b pb-2">📅 วันที่แข่งขัน: ${date} (${daySchedules.length} รายการ)</h3>
+              <div class="space-y-2">
+                ${daySchedules.map(sc => {
+                  const res = results.find(r => r.schedule_id === sc.schedule_id);
+                  return res ? renderResultCardCompact(res) : renderMatchCardCompact(sc);
+                }).join('')}
+              </div>
+            </div>
+          `;
+        }).join('') || '<p class="text-slate-400">ยังไม่มีข้อมูลรายงาน</p>';
+      } else if (REPORT_MODE === 'color') {
+        out.innerHTML = colors.map(col => {
+          const colResults = results.filter(r => {
+            const rks = safeJson(r.rankings_json, []);
+            return rks.some(k => k.color_id === col.color_id);
+          });
+          return `
+            <div class="glass-card rounded-2xl p-5 space-y-3">
+              <div class="flex items-center justify-between border-b pb-2">
+                <h3 class="text-lg font-bold flex items-center gap-2">
+                  <span class="w-4 h-4 rounded-full" style="background:${col.hex_code}"></span> ${col.color_name}
+                </h3>
+                <span class="text-sm font-bold text-blue-700">ลงแข่งแล้ว ${colResults.length} รายการ</span>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                  <thead class="bg-slate-50 text-slate-600">
+                    <tr><th class="p-2">กีฬา</th><th class="p-2">รอบ</th><th class="p-2">ผลงาน/สถิติ</th><th class="p-2">อันดับ</th><th class="p-2 text-right">คะแนนถ้วยรวม</th></tr>
+                  </thead>
+                  <tbody class="divide-y">
+                    ${colResults.map(r => {
+                      const sp = getSportById(r.sport_id);
+                      const sc = schedules.find(s => s.schedule_id === r.schedule_id);
+                      const rk = safeJson(r.rankings_json, []).find(k => k.color_id === col.color_id);
+                      const pts = safeJson(r.trophy_awarded_json, {})[col.color_id] || 0;
+                      return `<tr>
+                        <td class="p-2 font-semibold">${sp?.sport_name || r.sport_id}</td>
+                        <td class="p-2">${sc?.round_name || '-'}</td>
+                        <td class="p-2 font-mono">${rk?.score_display || '-'}</td>
+                        <td class="p-2 font-bold">อันดับ ${rk?.rank || '-'}</td>
+                        <td class="p-2 text-right font-bold text-emerald-700">+${pts}</td>
+                      </tr>`;
+                    }).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } else if (REPORT_MODE === 'sport') {
+        out.innerHTML = sports.map(sp => {
+          const spResults = results.filter(r => r.sport_id === sp.sport_id);
+          return `
+            <div class="glass-card rounded-2xl p-5 space-y-3">
+              <div class="flex items-center justify-between border-b pb-2">
+                <h3 class="text-lg font-bold text-slate-900">🏅 ${sp.sport_name} <span class="text-xs font-normal text-slate-500">(${sp.category})</span></h3>
+                <span class="text-xs bg-slate-100 px-2.5 py-1 rounded-full">ตัวคูณคะแนน x${sp.weight_multiplier}</span>
+              </div>
+              <div class="space-y-2">
+                ${spResults.length ? spResults.map(r => renderResultCardCompact(r)).join('') : '<p class="text-xs text-slate-400">ยังไม่มีผลการแข่งขัน</p>'}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function exportReportCSV() {
+      let csv = '\uFEFFประเภทกีฬา,รอบการแข่งขัน,วันที่,สี,อันดับ,สถิติ/คะแนน,คะแนนถ้วยรางวัลรวม\n';
+      APP_STATE.results.forEach(r => {
+        const sp = getSportById(r.sport_id);
+        const sc = APP_STATE.schedules.find(s => s.schedule_id === r.schedule_id);
+        const rks = safeJson(r.rankings_json, []);
+        const ptsMap = safeJson(r.trophy_awarded_json, {});
+        rks.forEach(rk => {
+          const col = getColorById(rk.color_id);
+          csv += `"${sp?.sport_name || ''}","${sc?.round_name || ''}","${sc?.match_date || ''}","${col?.color_name || ''}",${rk.rank},"${rk.score_display}",${ptsMap[rk.color_id] || 0}\n`;
+        });
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `SportG_Report_${APP_STATE.active_year_id}.csv`;
+      link.click();
+    }
+
+    // -------------------------------------------------------------------------
+    // TAB 5: SPORTS & TROPHY POINTS CONFIG
+    // -------------------------------------------------------------------------
+    function renderSportsTab() {
+      document.getElementById('sportsListContainer').innerHTML = APP_STATE.sports.map(sp => {
+        const pts = safeJson(sp.trophy_points_json, {});
+        return `
+          <div class="glass-card rounded-2xl p-4 space-y-2">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="text-xs font-semibold px-2 py-0.5 rounded bg-blue-50 text-blue-700">${sp.category}</span>
+                <h4 class="font-bold text-base text-slate-900 mt-1">${sp.sport_name}</h4>
+                <p class="text-xs text-slate-500">กติกา: ${sp.rule_preset} (${sp.scoring_mode}) • ตัวคูณ x${sp.weight_multiplier}</p>
+              </div>
+              <div class="flex gap-1">
+                <button onclick="openSportModal('${sp.sport_id}')" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                <button onclick="deleteRecord('sport','sport_id','${sp.sport_id}')" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+              </div>
+            </div>
+            <div class="bg-slate-50 p-2.5 rounded-xl text-xs text-slate-700 flex flex-wrap gap-2">
+              <span class="font-semibold">คะแนนถ้วยรวม:</span>
+              <span>ที่1: <b>${pts['1'] ?? 0}</b></span>
+              <span>ที่2: <b>${pts['2'] ?? 0}</b></span>
+              <span>ที่3: <b>${pts['3'] ?? 0}</b></span>
+              <span>ที่4: <b>${pts['4'] ?? 0}</b></span>
+              ${pts['WIN'] !== undefined ? `<span>ชนะ: <b>${pts['WIN']}</b> / เสมอ: <b>${pts['DRAW'] ?? 0}</b></span>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openSportModal(sportId = '') {
+      const sp = sportId ? getSportById(sportId) : null;
+      const pts = sp ? safeJson(sp.trophy_points_json, {}) : SPORT_PRESETS.STD_FOOTBALL.points;
+      const cfg = sp ? safeJson(sp.rule_config_json, {}) : SPORT_PRESETS.STD_FOOTBALL.config;
+
+      openModal(`
+        <h3 class="text-lg font-bold mb-4">${sp ? 'แก้ไขประเภทกีฬา' : 'เพิ่มประเภทกีฬาใหม่'}</h3>
+        <form onsubmit="saveSport(event, '${sportId}')" class="space-y-3 text-sm">
+          <div>
+            <label class="block font-semibold mb-1">ชื่อประเภทกีฬา</label>
+            <input type="text" id="spName" required value="${sp?.sport_name || ''}" placeholder="เช่น ฟุตบอลชาย 11 คน, วิ่งผลัด 4x100 ม." class="w-full border rounded-xl px-3 py-2">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold mb-1">หมวดหมู่</label>
+              <input type="text" id="spCategory" value="${sp?.category || 'กีฬาสากล'}" class="w-full border rounded-xl px-3 py-2">
+            </div>
+            <div>
+              <label class="block font-semibold mb-1">ตัวคูณความสำคัญ</label>
+              <input type="number" step="0.5" id="spMult" value="${sp?.weight_multiplier || 1}" class="w-full border rounded-xl px-3 py-2">
+            </div>
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">เลือกกติกามาตรฐานสากล หรือ กำหนดเอง</label>
+            <select id="spPreset" onchange="applyPresetToModal(this.value)" class="w-full border rounded-xl px-3 py-2">
+              ${Object.keys(SPORT_PRESETS).map(k => `<option value="${k}" ${sp?.rule_preset === k ? 'selected' : ''}>${SPORT_PRESETS[k].label}</option>`).join('')}
+            </select>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold mb-1">หน่วยนับคะแนน</label>
+              <input type="text" id="spUnit" value="${cfg.unit || 'คะแนน'}" class="w-full border rounded-xl px-3 py-2">
+            </div>
+            <div>
+              <label class="block font-semibold mb-1">เกณฑ์ตัดสินผู้ชนะ</label>
+              <select id="spSort" class="w-full border rounded-xl px-3 py-2">
+                <option value="DESC" ${cfg.sort_order !== 'ASC' ? 'selected' : ''}>คะแนน/สถิติ มากสุดชนะ</option>
+                <option value="ASC" ${cfg.sort_order === 'ASC' ? 'selected' : ''}>เวลา/สถิติ น้อยสุดชนะ (เช่น วิ่ง/ว่ายน้ำ)</option>
+              </select>
+            </div>
+          </div>
+          <div class="bg-blue-50/70 p-3 rounded-xl space-y-2">
+            <p class="font-bold text-blue-900">ตั้งค่าคะแนนถ้วยรางวัลรวม (Overall Trophy Points)</p>
+            <div class="grid grid-cols-4 gap-2">
+              <div><label class="text-xs">อันดับ 1</label><input type="number" id="pt1" value="${pts['1'] ?? 10}" class="w-full border rounded-lg px-2 py-1"></div>
+              <div><label class="text-xs">อันดับ 2</label><input type="number" id="pt2" value="${pts['2'] ?? 7}" class="w-full border rounded-lg px-2 py-1"></div>
+              <div><label class="text-xs">อันดับ 3</label><input type="number" id="pt3" value="${pts['3'] ?? 5}" class="w-full border rounded-lg px-2 py-1"></div>
+              <div><label class="text-xs">อันดับ 4</label><input type="number" id="pt4" value="${pts['4'] ?? 3}" class="w-full border rounded-lg px-2 py-1"></div>
+            </div>
+            <div class="grid grid-cols-3 gap-2 pt-1">
+              <div><label class="text-xs">ชนะรอบแบ่งกลุ่ม</label><input type="number" id="ptWin" value="${pts['WIN'] ?? 3}" class="w-full border rounded-lg px-2 py-1"></div>
+              <div><label class="text-xs">เสมอ</label><input type="number" id="ptDraw" value="${pts['DRAW'] ?? 1}" class="w-full border rounded-lg px-2 py-1"></div>
+              <div><label class="text-xs">แพ้/เข้าร่วม</label><input type="number" id="ptLoss" value="${pts['LOSS'] ?? 0}" class="w-full border rounded-lg px-2 py-1"></div>
+            </div>
+          </div>
+          <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-xl">บันทึกประเภทกีฬา</button>
+        </form>
+      `);
+    }
+
+    function applyPresetToModal(presetKey) {
+      const p = SPORT_PRESETS[presetKey];
+      if (!p) return;
+      document.getElementById('spUnit').value = p.config.unit || 'คะแนน';
+      document.getElementById('spSort').value = p.config.sort_order || 'DESC';
+      document.getElementById('pt1').value = p.points['1'] ?? 10;
+      document.getElementById('pt2').value = p.points['2'] ?? 7;
+      document.getElementById('pt3').value = p.points['3'] ?? 5;
+      document.getElementById('pt4').value = p.points['4'] ?? 3;
+      document.getElementById('ptWin').value = p.points['WIN'] ?? 0;
+      document.getElementById('ptDraw').value = p.points['DRAW'] ?? 0;
+      document.getElementById('ptLoss').value = p.points['LOSS'] ?? 0;
+    }
+
+    async function saveSport(e, sportId) {
+      e.preventDefault();
+      const presetKey = document.getElementById('spPreset').value;
+      const preset = SPORT_PRESETS[presetKey];
+      const cfg = Object.assign({}, preset.config, {
+        unit: document.getElementById('spUnit').value,
+        sort_order: document.getElementById('spSort').value
+      });
+      const pts = {
+        "1": Number(document.getElementById('pt1').value),
+        "2": Number(document.getElementById('pt2').value),
+        "3": Number(document.getElementById('pt3').value),
+        "4": Number(document.getElementById('pt4').value),
+        "WIN": Number(document.getElementById('ptWin').value),
+        "DRAW": Number(document.getElementById('ptDraw').value),
+        "LOSS": Number(document.getElementById('ptLoss').value)
+      };
+      closeModal();
+      await postApi({
+        action: 'upsert_record',
+        sheet: 'sport',
+        id_field: 'sport_id',
+        record: {
+          sport_id: sportId,
+          year_id: APP_STATE.active_year_id,
+          sport_name: document.getElementById('spName').value,
+          category: document.getElementById('spCategory').value,
+          rule_preset: presetKey,
+          scoring_mode: preset.mode,
+          rule_config_json: JSON.stringify(cfg),
+          trophy_points_json: JSON.stringify(pts),
+          weight_multiplier: Number(document.getElementById('spMult').value || 1),
+          status: 'ACTIVE'
+        }
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // SCHEDULE MODAL
+    // -------------------------------------------------------------------------
+    function openScheduleModal(scheduleId = '') {
+      const sc = scheduleId ? APP_STATE.schedules.find(s => s.schedule_id === scheduleId) : null;
+      const selectedCols = sc ? safeJson(sc.participants_json, []) : [];
+
+      openModal(`
+        <h3 class="text-lg font-bold mb-4">${sc ? 'แก้ไขตารางแข่งขัน' : 'เพิ่มตารางแข่งขันใหม่'}</h3>
+        <form onsubmit="saveSchedule(event, '${scheduleId}')" class="space-y-3 text-sm">
+          <div>
+            <label class="block font-semibold mb-1">ประเภทกีฬา</label>
+            <select id="scSport" required class="w-full border rounded-xl px-3 py-2">
+              ${APP_STATE.sports.map(s => `<option value="${s.sport_id}" ${sc?.sport_id === s.sport_id ? 'selected' : ''}>${s.sport_name}</option>`).join('')}
+            </select>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold mb-1">รอบการแข่งขัน</label>
+              <input type="text" id="scRound" required value="${sc?.round_name || 'รอบแบ่งกลุ่ม'}" placeholder="เช่น รอบแรก, รอบชิงชนะเลิศ" class="w-full border rounded-xl px-3 py-2">
+            </div>
+            <div>
+              <label class="block font-semibold mb-1">สนามแข่งขัน</label>
+              <input type="text" id="scVenue" required value="${sc?.venue || 'สนามกลาง 1'}" class="w-full border rounded-xl px-3 py-2">
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="block font-semibold mb-1">วันที่แข่ง</label>
+              <input type="date" id="scDate" required value="${sc?.match_date || ''}" class="w-full border rounded-xl px-3 py-2">
+            </div>
+            <div>
+              <label class="block font-semibold mb-1">เวลาเริ่ม</label>
+              <input type="time" id="scStart" required value="${sc?.start_time || '09:00'}" class="w-full border rounded-xl px-3 py-2">
+            </div>
+            <div>
+              <label class="block font-semibold mb-1">เวลาสิ้นสุด</label>
+              <input type="time" id="scEnd" required value="${sc?.end_time || '10:00'}" class="w-full border rounded-xl px-3 py-2">
+            </div>
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">เลือกคณะสีที่ลงแข่งขัน (เลือกได้ 2 สี หรือทุกสี)</label>
+            <div class="grid grid-cols-2 gap-2 p-3 bg-slate-50 rounded-xl border">
+              ${APP_STATE.colors.map(c => `
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" class="sc-col-chk" value="${c.color_id}" ${selectedCols.includes(c.color_id) ? 'checked' : ''}>
+                  <span class="w-3 h-3 rounded-full" style="background:${c.hex_code}"></span>
+                  <span>${c.color_name}</span>
+                </label>
+              `).join('')}
+            </div>
+          </div>
+          <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-xl">บันทึกตารางแข่งขัน</button>
+        </form>
+      `);
+    }
+
+    async function saveSchedule(e, scheduleId) {
+      e.preventDefault();
+      const cols = [...document.querySelectorAll('.sc-col-chk:checked')].map(el => el.value);
+      if (cols.length < 2) {
+        alert('กรุณาเลือกคณะสีที่ลงแข่งขันอย่างน้อย 2 สี');
+        return;
+      }
+      closeModal();
+      await postApi({
+        action: 'upsert_record',
+        sheet: 'schedule',
+        id_field: 'schedule_id',
+        record: {
+          schedule_id: scheduleId,
+          year_id: APP_STATE.active_year_id,
+          sport_id: document.getElementById('scSport').value,
+          round_name: document.getElementById('scRound').value,
+          match_date: document.getElementById('scDate').value,
+          start_time: document.getElementById('scStart').value,
+          end_time: document.getElementById('scEnd').value,
+          venue: document.getElementById('scVenue').value,
+          participants_json: JSON.stringify(cols),
+          status: 'SCHEDULED',
+          notes: ''
+        }
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // TAB 6: MASTER DATA (YEARS, COLORS, USERS & ASSIGNMENTS)
+    // -------------------------------------------------------------------------
+    function renderMasterTab() {
+      // Years
+      document.getElementById('yearsListContainer').innerHTML = APP_STATE.years.map(y => {
+        const isActive = String(y.is_active).toUpperCase() === 'TRUE';
+        return `
+          <div class="p-4 rounded-xl border ${isActive ? 'border-blue-500 bg-blue-50/40' : 'border-slate-200'}">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-slate-900">${y.year_name}</span>
+              ${isActive ? '<span class="text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full">ใช้งานอยู่</span>'
+                : `<button onclick="postApi({action:'set_active_year', year_id:'${y.year_id}'})" class="text-xs text-blue-600 underline">ตั้งเป็นปีปัจจุบัน</button>`}
+            </div>
+            <p class="text-xs text-slate-500 mt-1">${y.theme_name || ''}</p>
+            <p class="text-xs text-slate-400 mt-0.5">${y.start_date} ถึง ${y.end_date}</p>
+          </div>
+        `;
+      }).join('');
+
+      // Colors
+      document.getElementById('colorsListContainer').innerHTML = APP_STATE.colors.map(c => `
+        <div class="p-4 rounded-xl border border-slate-200 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-xl shadow-inner shrink-0" style="background:${c.hex_code}"></span>
+            <div>
+              <div class="font-bold text-sm text-slate-900">${c.color_name}</div>
+              <div class="text-xs text-slate-500">${c.motto || ''}</div>
+            </div>
+          </div>
+          <button onclick="deleteRecord('color','color_id','${c.color_id}')" class="text-rose-500 hover:bg-rose-50 p-1.5 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+        </div>
+      `).join('');
+
+      // Users & Assignments
+      document.getElementById('usersTableBody').innerHTML = APP_STATE.users.map(u => {
+        const userAssigns = APP_STATE.assignments.filter(a => a.user_id === u.user_id);
+        const assignLabels = userAssigns.map(a => {
+          const sp = a.sport_id === 'ALL' ? 'ทุกกีฬา' : (getSportById(a.sport_id)?.sport_name || a.sport_id);
+          return `<span class="inline-flex items-center gap-1 bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded text-xs mr-1 mb-1">${sp} (${a.venue}) <button onclick="deleteRecord('assignments','assign_id','${a.assign_id}')" class="text-rose-500 font-bold">×</button></span>`;
+        }).join('');
+        return `
+          <tr>
+            <td class="p-3 font-semibold">${u.full_name}</td>
+            <td class="p-3 font-mono text-xs">${u.username}</td>
+            <td class="p-3"><span class="px-2 py-0.5 rounded text-xs font-bold bg-slate-100">${u.role}</span></td>
+            <td class="p-3">${u.role === 'ADMIN' ? '<span class="text-xs text-emerald-700 font-semibold">สิทธิ์เต็มทั้งระบบ</span>' : (assignLabels || '<span class="text-xs text-slate-400">ยังไม่กำหนด</span>')}</td>
+            <td class="p-3 text-right">
+              <button onclick="deleteRecord('users','user_id','${u.user_id}')" class="text-rose-600 hover:underline text-xs">ลบ</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function openYearModal() {
+      openModal(`
+        <h3 class="text-lg font-bold mb-4">เพิ่มปีการศึกษาใหม่</h3>
+        <form onsubmit="saveYear(event)" class="space-y-3 text-sm">
+          <div><label class="block font-semibold mb-1">ชื่อปีการศึกษา</label><input type="text" id="yrName" required placeholder="เช่น ปีการศึกษา 2570" class="w-full border rounded-xl px-3 py-2"></div>
+          <div><label class="block font-semibold mb-1">คำขวัญ / ธีมงาน</label><input type="text" id="yrTheme" class="w-full border rounded-xl px-3 py-2"></div>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="block font-semibold mb-1">วันเริ่มงาน</label><input type="date" id="yrStart" required class="w-full border rounded-xl px-3 py-2"></div>
+            <div><label class="block font-semibold mb-1">วันสิ้นสุด</label><input type="date" id="yrEnd" required class="w-full border rounded-xl px-3 py-2"></div>
+          </div>
+          <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-xl">บันทึกปีการศึกษา</button>
+        </form>
+      `);
+    }
+
+    async function saveYear(e) {
+      e.preventDefault();
+      closeModal();
+      await postApi({
+        action: 'upsert_record', sheet: 'year', id_field: 'year_id',
+        record: {
+          year_name: document.getElementById('yrName').value,
+          theme_name: document.getElementById('yrTheme').value,
+          start_date: document.getElementById('yrStart').value,
+          end_date: document.getElementById('yrEnd').value,
+          is_active: 'FALSE'
+        }
+      });
+    }
+
+    function openColorModal() {
+      openModal(`
+        <h3 class="text-lg font-bold mb-4">เพิ่มคณะสีใหม่</h3>
+        <form onsubmit="saveColor(event)" class="space-y-3 text-sm">
+          <div><label class="block font-semibold mb-1">ชื่อคณะสี</label><input type="text" id="colName" required placeholder="เช่น คณะสีม่วง" class="w-full border rounded-xl px-3 py-2"></div>
+          <div><label class="block font-semibold mb-1">เลือกเฉดสีประจำทีม</label><input type="color" id="colHex" value="#8b5cf6" class="w-full h-11 border rounded-xl p-1"></div>
+          <div><label class="block font-semibold mb-1">คำขวัญ / ฉายา</label><input type="text" id="colMotto" class="w-full border rounded-xl px-3 py-2"></div>
+          <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-xl">บันทึกคณะสี</button>
+        </form>
+      `);
+    }
+
+    async function saveColor(e) {
+      e.preventDefault();
+      closeModal();
+      await postApi({
+        action: 'upsert_record', sheet: 'color', id_field: 'color_id',
+        record: {
+          year_id: APP_STATE.active_year_id,
+          color_name: document.getElementById('colName').value,
+          hex_code: document.getElementById('colHex').value,
+          secondary_hex: '#f1f5f9',
+          motto: document.getElementById('colMotto').value,
+          status: 'ACTIVE'
+        }
+      });
+    }
+
+    function openUserModal() {
+      openModal(`
+        <h3 class="text-lg font-bold mb-4">เพิ่มผู้ใช้งานระบบ</h3>
+        <form onsubmit="saveUser(event)" class="space-y-3 text-sm">
+          <div><label class="block font-semibold mb-1">ชื่อ-นามสกุล</label><input type="text" id="uFull" required class="w-full border rounded-xl px-3 py-2"></div>
+          <div><label class="block font-semibold mb-1">Username</label><input type="text" id="uName" required class="w-full border rounded-xl px-3 py-2"></div>
+          <div><label class="block font-semibold mb-1">Password</label><input type="password" id="uPass" required class="w-full border rounded-xl px-3 py-2"></div>
+          <div>
+            <label class="block font-semibold mb-1">ระดับสิทธิ์ (Role)</label>
+            <select id="uRole" class="w-full border rounded-xl px-3 py-2">
+              <option value="SCORER">SCORER (กรรมการบันทึกผลตามที่มอบหมาย)</option>
+              <option value="ORGANIZER">ORGANIZER (ฝ่ายจัดตารางแข่งขันและกติกา)</option>
+              <option value="ADMIN">ADMIN (ผู้ดูแลระบบสูงสุด)</option>
+            </select>
+          </div>
+          <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-xl">บันทึกผู้ใช้งาน</button>
+        </form>
+      `);
+    }
+
+    async function saveUser(e) {
+      e.preventDefault();
+      closeModal();
+      await postApi({
+        action: 'upsert_record', sheet: 'users', id_field: 'user_id',
+        record: {
+          full_name: document.getElementById('uFull').value,
+          username: document.getElementById('uName').value,
+          password: document.getElementById('uPass').value,
+          role: document.getElementById('uRole').value,
+          color_id: 'ALL',
+          status: 'ACTIVE'
+        }
+      });
+    }
+
+    function openAssignModal() {
+      openModal(`
+        <h3 class="text-lg font-bold mb-4">มอบหมายสิทธิ์ดูแลกีฬา / สนามแข่ง</h3>
+        <form onsubmit="saveAssignment(event)" class="space-y-3 text-sm">
+          <div>
+            <label class="block font-semibold mb-1">เลือกเจ้าหน้าที่</label>
+            <select id="asUser" class="w-full border rounded-xl px-3 py-2">
+              ${APP_STATE.users.map(u => `<option value="${u.user_id}">${u.full_name} (${u.role})</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">ประเภทกีฬาที่รับผิดชอบ</label>
+            <select id="asSport" class="w-full border rounded-xl px-3 py-2">
+              <option value="ALL">ทุกประเภทกีฬา (ALL)</option>
+              ${APP_STATE.sports.map(s => `<option value="${s.sport_id}">${s.sport_name}</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">สนามแข่งขัน (ระบุชื่อสนาม หรือ ALL)</label>
+            <input type="text" id="asVenue" value="ALL" class="w-full border rounded-xl px-3 py-2">
+          </div>
+          <button type="submit" class="w-full bg-indigo-600 text-white font-semibold py-2.5 rounded-xl">บันทึกการมอบหมายสิทธิ์</button>
+        </form>
+      `);
+    }
+
+    async function saveAssignment(e) {
+      e.preventDefault();
+      closeModal();
+      await postApi({
+        action: 'upsert_record', sheet: 'assignments', id_field: 'assign_id',
+        record: {
+          year_id: APP_STATE.active_year_id,
+          user_id: document.getElementById('asUser').value,
+          sport_id: document.getElementById('asSport').value,
+          venue: document.getElementById('asVenue').value || 'ALL',
+          can_edit_schedule: 'TRUE',
+          can_record_score: 'TRUE'
+        }
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // TAB 7: SETTINGS (EVENT NAME & LOGO UPLOAD)
+    // -------------------------------------------------------------------------
+    async function saveSystemSettings(e) {
+      e.preventDefault();
+      const newGas = document.getElementById('setGasUrl').value.trim();
+      if (newGas) {
+        GAS_URL = newGas;
+        localStorage.setItem('sportg_gas_url', newGas);
+      }
+
+      const fileInput = document.getElementById('setLogoFile');
+      let logoBase64 = '';
+      let logoFilename = '';
+
+      if (fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        logoFilename = file.name;
+        logoBase64 = await toBase64(file);
+      }
+
+      await postApi({
+        action: 'update_settings',
+        logo_base64: logoBase64,
+        logo_filename: logoFilename,
+        settings: {
+          event_name: document.getElementById('setEventName').value,
+          event_subtitle: document.getElementById('setEventSubtitle').value,
+          logo_url: document.getElementById('setLogoUrl').value,
+          refresh_interval_sec: document.getElementById('setRefreshSec').value
+        }
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // AUTH & NAVIGATION HELPERS
+    // -------------------------------------------------------------------------
+    function openLoginModal() {
+      openModal(`
+        <h3 class="text-lg font-bold mb-1">เข้าสู่ระบบเจ้าหน้าที่</h3>
+        <p class="text-xs text-slate-500 mb-4">สำหรับกรรมการบันทึกผล ฝ่ายจัดแข่งขัน และผู้ดูแลระบบ</p>
+        <form onsubmit="submitLogin(event)" class="space-y-3 text-sm">
+          <div><label class="block font-semibold mb-1">ชื่อผู้ใช้งาน (Username)</label><input type="text" id="loginUser" required class="w-full border rounded-xl px-3 py-2"></div>
+          <div><label class="block font-semibold mb-1">รหัสผ่าน (Password)</label><input type="password" id="loginPass" required class="w-full border rounded-xl px-3 py-2"></div>
+          <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-xl">เข้าสู่ระบบ</button>
+        </form>
+      `);
+    }
+
+    async function submitLogin(e) {
+      e.preventDefault();
+      const res = await postApi({
+        action: 'login',
+        username: document.getElementById('loginUser').value,
+        password: document.getElementById('loginPass').value
+      });
+      if (res.status === 'success') {
+        CURRENT_USER = res.user;
+        USER_ASSIGNMENTS = res.assignments || [];
+        localStorage.setItem('sportg_user', JSON.stringify(CURRENT_USER));
+        localStorage.setItem('sportg_assignments', JSON.stringify(USER_ASSIGNMENTS));
+        closeModal();
+        updateAuthUI();
+        renderAll();
+      }
+    }
+
+    function logoutUser() {
+      CURRENT_USER = null;
+      USER_ASSIGNMENTS = [];
+      localStorage.removeItem('sportg_user');
+      localStorage.removeItem('sportg_assignments');
+      updateAuthUI();
+      switchTab('dashboard');
+      renderAll();
+    }
+
+    function updateAuthUI() {
+      const authArea = document.getElementById('authArea');
+      if (CURRENT_USER) {
+        authArea.innerHTML = `
+          <div class="flex items-center gap-2 bg-slate-800 px-3 py-1 rounded-lg border border-slate-700 text-xs">
+            <span class="text-emerald-400 font-bold">${CURRENT_USER.full_name}</span>
+            <button onclick="logoutUser()" class="text-rose-400 hover:underline ml-1">ออก</button>
+          </div>
+        `;
+      } else {
+        authArea.innerHTML = `
+          <button onclick="openLoginModal()" class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs md:text-sm font-medium px-3 py-1.5 rounded-lg transition shadow">
+            <i data-lucide="log-in" class="w-4 h-4"></i> เจ้าหน้าที่
+          </button>
+        `;
+      }
+
+      document.querySelectorAll('#mainNav [data-role]').forEach(btn => {
+        const roles = btn.dataset.role.split(',');
+        const allowed = CURRENT_USER && roles.includes(CURRENT_USER.role);
+        btn.classList.toggle('hidden', !allowed);
+      });
+      lucide.createIcons();
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`tab-${tabName}`)?.classList.remove('hidden');
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tabName);
+      });
+    }
+
+    async function deleteRecord(sheet, idField, idValue) {
+      if (!confirm('ยืนยันการลบข้อมูลรายการนี้?')) return;
+      await postApi({ action: 'delete_record', sheet, id_field: idField, id_value: idValue });
+    }
+
+    function getSportById(id) { return APP_STATE?.sports.find(s => s.sport_id === id); }
+    function getColorById(id) { return APP_STATE?.colors.find(c => c.color_id === id); }
+
+    function renderColorPills(ids) {
+      return ids.map(id => {
+        const c = getColorById(id);
+        if (!c) return `<span class="text-xs px-2 py-0.5 bg-slate-200 rounded">${id}</span>`;
+        return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border" style="background:${c.secondary_hex || '#f8fafc'}; border-color:${c.hex_code}40; color:#0f172a">
+          <span class="w-2.5 h-2.5 rounded-full" style="background:${c.hex_code}"></span>${c.color_name}
+        </span>`;
+      }).join('');
+    }
+
+    function safeJson(str, fallback) {
+      try { return typeof str === 'object' ? str : JSON.parse(str); } catch (e) { return fallback; }
+    }
+
+    function toBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = err => reject(err);
+      });
+    }
+
+    function openModal(html) {
+      document.getElementById('modalBox').innerHTML = `
+        <div class="flex justify-end mb-1"><button onclick="closeModal()" class="text-slate-400 hover:text-slate-700 text-xl font-bold leading-none">×</button></div>
+        ${html}
+      `;
+      document.getElementById('modalBackdrop').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('modalBackdrop').classList.add('hidden');
+    }
+
+    function showToast(msg, type = 'info') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.remove('hidden', 'border-emerald-500', 'border-rose-500');
+      if (type === 'success') t.classList.add('border-emerald-500');
+      if (type === 'error') t.classList.add('border-rose-500');
+      setTimeout(() => t.classList.add('hidden'), 3200);
+    }
+  </script>
+</body>
+</html>
