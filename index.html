@@ -591,10 +591,35 @@
         </div>
       `;
 
-      const maxPts = Math.max(1, ...leaderboard.map(c => c.total_points));
+      const maxPts = Math.max(1, ...leaderboard.map(c => Number(c.total_points || 0)));
+      let currentRank = 0;
+
       document.getElementById('leaderboardContainer').innerHTML = leaderboard.map((c, idx) => {
-        const pct = Math.round((c.total_points / maxPts) * 100);
-        const rankBadge = idx === 0 ? '🥇 อันดับ 1' : idx === 1 ? '🥈 อันดับ 2' : idx === 2 ? '🥉 อันดับ 3' : `อันดับ ${idx + 1}`;
+        const pts = Number(c.total_points || 0);
+        const pct = Math.round((pts / maxPts) * 100);
+        let rankBadgeHtml = '';
+
+        // แสดงไอคอนและป้ายอันดับเฉพาะสีที่มีคะแนนรวมมากกว่า 0 เท่านั้น
+        if (pts > 0) {
+          const prev = idx > 0 ? leaderboard[idx - 1] : null;
+          const isTiedWithPrev = prev &&
+            Number(prev.total_points || 0) === pts &&
+            Number(prev.gold || 0) === Number(c.gold || 0) &&
+            Number(prev.silver || 0) === Number(c.silver || 0) &&
+            Number(prev.bronze || 0) === Number(c.bronze || 0);
+
+          if (!isTiedWithPrev) {
+            currentRank = idx + 1;
+          }
+
+          const rankLabel = currentRank === 1 ? '🥇 อันดับ 1'
+            : currentRank === 2 ? '🥈 อันดับ 2'
+            : currentRank === 3 ? '🥉 อันดับ 3'
+            : `อันดับ ${currentRank}`;
+
+          rankBadgeHtml = `<span class="text-xs font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">${rankLabel}</span>`;
+        }
+
         return `
           <div class="p-4 rounded-xl border border-slate-200 bg-white hover:shadow-md transition">
             <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
@@ -602,7 +627,7 @@
                 <span class="w-4 h-10 rounded-full shrink-0" style="background:${c.hex_code}"></span>
                 <div>
                   <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">${rankBadge}</span>
+                    ${rankBadgeHtml}
                     <h4 class="font-bold text-base text-slate-900">${c.color_name}</h4>
                   </div>
                   <p class="text-xs text-slate-500">${c.motto || ''}</p>
@@ -615,7 +640,7 @@
                   <span class="px-2 py-1 rounded bg-orange-100 text-orange-800">🥉 ${c.bronze}</span>
                 </div>
                 <div class="text-right">
-                  <span class="text-2xl font-extrabold text-slate-900">${c.total_points}</span>
+                  <span class="text-2xl font-extrabold text-slate-900">${pts}</span>
                   <span class="text-xs text-slate-500 block">คะแนนรวม</span>
                 </div>
               </div>
