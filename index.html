@@ -4,10 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SportG - ระบบบริหารจัดการแข่งขันกีฬาสี Real-Time</title>
+  <!-- Google Fonts: Prompt & Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     body {
@@ -38,6 +41,7 @@
   <!-- TOP HEADER & BRANDING -->
   <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-lg no-print">
     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <!-- Logo & Event Name -->
       <div class="flex items-center gap-3">
         <div id="brandLogoContainer" class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center overflow-hidden shadow-md shrink-0">
           <i data-lucide="trophy" class="w-7 h-7 text-slate-900"></i>
@@ -53,12 +57,14 @@
         </div>
       </div>
 
+      <!-- Right Controls: Year Selector, 5-Level Font Size, Sync, Auth -->
       <div class="flex flex-wrap items-center gap-2">
+        <!-- Year Selector -->
         <select id="globalYearSelect" onchange="changeActiveYearView(this.value)" class="bg-slate-800 text-white text-xs md:text-sm rounded-lg px-2.5 py-1.5 border border-slate-700 focus:outline-none focus:border-blue-400">
           <option value="">ปีการศึกษา...</option>
         </select>
 
-        <!-- ปรับขนาดตัวอักษร 5 ระดับ -->
+        <!-- 5-Level Font Size Switcher -->
         <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700" title="ปรับขนาดตัวอักษรทั้งระบบ 5 ระดับ">
           <span class="text-xs text-slate-400 px-1.5">ก</span>
           <button onclick="setFontLevel(1)" data-font-lvl="1" class="font-lvl-btn w-6 h-6 text-xs rounded font-semibold hover:bg-slate-700">1</button>
@@ -69,10 +75,12 @@
           <span class="text-sm font-bold text-slate-300 px-1.5">ก+</span>
         </div>
 
+        <!-- Manual Sync -->
         <button onclick="fetchState(true)" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 text-slate-200 transition" title="ซิงค์ข้อมูลทันที">
           <i id="syncIcon" data-lucide="refresh-cw" class="w-4 h-4"></i>
         </button>
 
+        <!-- User Auth Button -->
         <div id="authArea">
           <button onclick="openLoginModal()" class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs md:text-sm font-medium px-3 py-1.5 rounded-lg transition shadow">
             <i data-lucide="log-in" class="w-4 h-4"></i> เจ้าหน้าที่
@@ -81,6 +89,7 @@
       </div>
     </div>
 
+    <!-- Navigation Tabs -->
     <nav class="bg-slate-800/90 border-t border-slate-700/80 overflow-x-auto">
       <div class="max-w-7xl mx-auto px-4 py-2 flex items-center gap-1.5 min-w-max" id="mainNav">
         <button onclick="switchTab('dashboard')" data-tab="dashboard" class="nav-btn active flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-slate-200 hover:bg-slate-700 transition">
@@ -108,10 +117,14 @@
     </nav>
   </header>
 
+  <!-- MAIN CONTENT CONTAINER -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6">
+    <!-- Status Toast -->
     <div id="toast" class="fixed bottom-5 right-5 z-50 hidden bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-700 flex items-center gap-2.5 text-sm"></div>
 
-    <!-- TAB 1: DASHBOARD -->
+    <!-- ===================================================================
+         TAB 1: DASHBOARD (REAL-TIME OVERALL TROPHY & LIVE MATCHES)
+         =================================================================== -->
     <section id="tab-dashboard" class="tab-content space-y-6">
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="kpiCards"></div>
 
@@ -143,7 +156,9 @@
       </div>
     </section>
 
-    <!-- TAB 2: SCHEDULE -->
+    <!-- ===================================================================
+         TAB 2: SCHEDULE MANAGEMENT
+         =================================================================== -->
     <section id="tab-schedule" class="tab-content hidden space-y-5">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -176,7 +191,9 @@
       <div id="scheduleTableContainer" class="space-y-3"></div>
     </section>
 
-    <!-- TAB 3: SCORE RECORDING -->
+    <!-- ===================================================================
+         TAB 3: SCORE RECORDING (REFEREE / ADMIN)
+         =================================================================== -->
     <section id="tab-scoring" class="tab-content hidden space-y-5">
       <div>
         <h2 class="text-xl font-bold text-slate-900">บันทึกผลการแข่งขัน (Official Score Recorder)</h2>
@@ -186,7 +203,7 @@
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="glass-card rounded-2xl p-4 space-y-3">
           <h3 class="font-bold text-slate-800">1. เลือกรายการแข่งขัน</h3>
-          <input type="text" id="scoreSearchInput" oninput="renderScoringMatchList()" placeholder="ค้นหากีฬา, รอบ, สนาม..." class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+          <input type="text" id="scoreSearchInput" oninput="renderScoringMatchList()" placeholder="ค้นหากีฬา, รอบ, สนาม, คณะสี..." class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
           <div id="scoringMatchList" class="space-y-2 max-h-[550px] overflow-y-auto pr-1"></div>
         </div>
 
@@ -199,7 +216,9 @@
       </div>
     </section>
 
-    <!-- TAB 4: REPORTS -->
+    <!-- ===================================================================
+         TAB 4: REPORTS (BY DAY / BY COLOR / BY SPORT)
+         =================================================================== -->
     <section id="tab-reports" class="tab-content hidden space-y-5">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -225,7 +244,9 @@
       <div id="reportOutputArea" class="space-y-4"></div>
     </section>
 
-    <!-- TAB 5: SPORTS & SCORING RULES -->
+    <!-- ===================================================================
+         TAB 5: SPORTS & SCORING RULES CONFIG
+         =================================================================== -->
     <section id="tab-sports" class="tab-content hidden space-y-5">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -239,7 +260,9 @@
       <div id="sportsListContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
     </section>
 
-    <!-- TAB 6: MASTER DATA -->
+    <!-- ===================================================================
+         TAB 6: MASTER DATA (YEARS, COLORS, USERS & ASSIGNMENTS)
+         =================================================================== -->
     <section id="tab-master" class="tab-content hidden space-y-6">
       <div class="glass-card rounded-2xl p-5 space-y-4">
         <div class="flex items-center justify-between">
@@ -282,7 +305,9 @@
       </div>
     </section>
 
-    <!-- TAB 7: SETTINGS -->
+    <!-- ===================================================================
+         TAB 7: EVENT BRANDING & API CONNECTION SETTINGS
+         =================================================================== -->
     <section id="tab-settings" class="tab-content hidden max-w-3xl mx-auto">
       <div class="glass-card rounded-2xl p-6 space-y-5">
         <div>
@@ -332,13 +357,17 @@
     </section>
   </main>
 
-  <!-- MODAL -->
+  <!-- UNIVERSAL MODAL CONTAINER -->
   <div id="modalBackdrop" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div id="modalBox" class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto"></div>
   </div>
 
+  <!-- ===================================================================
+       JAVASCRIPT APPLICATION ENGINE
+       =================================================================== -->
   <script>
-    const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_DEPLOYMENT_ID/exec';
+    // ใส่ Web App URL จาก Google Apps Script ที่ Deploy แล้วตรงนี้
+    const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbwqqZ2jtbIQm_wchphx0HvKr4IWPzuJb2q-FaXsIJtzqEFm2mXEoaEh-2AtMo09QeND/exec';
 
     let GAS_URL = localStorage.getItem('sportg_gas_url') || DEFAULT_GAS_URL;
     let APP_STATE = null;
@@ -367,7 +396,7 @@
       return fullMonth ? `${day} ${mName} พ.ศ. ${yearBE}` : `${day} ${mName} ${yearBE}`;
     }
 
-    // แปลงวันที่เป็น วว/ดด/พ.ศ. สำหรับ CSV
+    // แปลงวันที่เป็น วว/ดด/พ.ศ. สำหรับส่งออก CSV
     function formatThaiDateSlash(dateStr) {
       if (!dateStr) return '';
       const parts = String(dateStr).split('T')[0].split('-');
@@ -376,7 +405,7 @@
       return `${parts[2]}/${parts[1]}/${yearBE}`;
     }
 
-    // จัดรูปแบบเวลา 24 ชั่วโมง (HH:mm) รองรับทั้งค่าจาก Sheet และ ISO String
+    // จัดรูปแบบเวลา 24 ชั่วโมง (HH:mm)
     function formatTime24(timeVal) {
       if (!timeVal) return '--:--';
       const str = String(timeVal).trim().replace(/^'/, '');
@@ -393,6 +422,7 @@
       return str;
     }
 
+    // กติกามาตรฐานสากลสำเร็จรูป (International Presets)
     const SPORT_PRESETS = {
       STD_FOOTBALL: {
         label: 'ฟุตบอล / ฟุตซอล (มาตรฐานสากล - นับประตู + จุดโทษ)',
@@ -438,6 +468,9 @@
       }
     };
 
+    // -------------------------------------------------------------------------
+    // INITIALIZATION & 5-LEVEL FONT SCALING
+    // -------------------------------------------------------------------------
     document.addEventListener('DOMContentLoaded', () => {
       const savedFontLvl = Number(localStorage.getItem('sportg_font_level') || 3);
       setFontLevel(savedFontLvl);
@@ -480,6 +513,9 @@
       fetchState(true);
     }
 
+    // -------------------------------------------------------------------------
+    // REAL-TIME DATA SYNC ENGINE
+    // -------------------------------------------------------------------------
     async function fetchState(forceRender = false) {
       const syncIcon = document.getElementById('syncIcon');
       if (syncIcon) syncIcon.classList.add('animate-spin');
@@ -527,6 +563,9 @@
       return json;
     }
 
+    // -------------------------------------------------------------------------
+    // MASTER RENDERER
+    // -------------------------------------------------------------------------
     function renderAll() {
       if (!APP_STATE) return;
       const { settings, years, active_year_id } = APP_STATE;
@@ -566,7 +605,9 @@
       fetchState(true);
     }
 
-    // TAB 1: DASHBOARD
+    // -------------------------------------------------------------------------
+    // TAB 1: DASHBOARD (ซ่อนไอคอนอันดับหากคะแนนรวมเป็น 0)
+    // -------------------------------------------------------------------------
     function renderDashboard() {
       const { leaderboard, schedules, results, sports, colors } = APP_STATE;
       const completedCount = schedules.filter(s => s.status === 'COMPLETED').length;
@@ -599,7 +640,7 @@
         const pct = Math.round((pts / maxPts) * 100);
         let rankBadgeHtml = '';
 
-        // แสดงไอคอนและป้ายอันดับเฉพาะสีที่มีคะแนนรวมมากกว่า 0 เท่านั้น
+        // แสดงไอคอนและป้ายอันดับเฉพาะคณะสีที่มีผลคะแนนรวมมากกว่า 0 เท่านั้น
         if (pts > 0) {
           const prev = idx > 0 ? leaderboard[idx - 1] : null;
           const isTiedWithPrev = prev &&
@@ -715,7 +756,9 @@
       `;
     }
 
+    // -------------------------------------------------------------------------
     // TAB 2: SCHEDULE
+    // -------------------------------------------------------------------------
     function populateScheduleFilters() {
       const dates = [...new Set(APP_STATE.schedules.map(s => s.match_date))].sort();
       document.getElementById('filterSchedDate').innerHTML = '<option value="">ทุกวันที่แข่งขัน</option>' +
@@ -734,7 +777,10 @@
 
       const list = APP_STATE.schedules.filter(sc => {
         if (dVal && sc.match_date !== dVal) return false;
-        if (sVal && sc.sport_id !== sVal) return false;
+        if (sVal) {
+          const resolvedSp = getSportById(sc.sport_id);
+          if (String(sc.sport_id).trim() !== sVal && String(resolvedSp?.sport_id || '').trim() !== sVal) return false;
+        }
         if (stVal && sc.status !== stVal) return false;
         if (cVal && !safeJson(sc.participants_json, []).includes(cVal)) return false;
         return true;
@@ -779,33 +825,41 @@
       lucide.createIcons();
     }
 
-    // TAB 3: SCORE RECORDING
+    // -------------------------------------------------------------------------
+    // TAB 3: SCORE RECORDING (DYNAMIC BY SPORT RULE)
+    // -------------------------------------------------------------------------
     function renderScoringMatchList() {
-      const q = (document.getElementById('scoreSearchInput')?.value || '').toLowerCase();
+      const q = (document.getElementById('scoreSearchInput')?.value || '').toLowerCase().trim();
       const allowedSchedules = APP_STATE.schedules.filter(sc => {
         if (!CURRENT_USER) return false;
         if (CURRENT_USER.role === 'ADMIN' || CURRENT_USER.role === 'ORGANIZER') return true;
+        const resolvedSport = getSportById(sc.sport_id);
+        const matchSportId = resolvedSport ? String(resolvedSport.sport_id).trim() : String(sc.sport_id).trim();
         return USER_ASSIGNMENTS.some(a =>
-          (a.sport_id === 'ALL' || a.sport_id === sc.sport_id) &&
-          (a.venue === 'ALL' || a.venue === sc.venue) &&
+          (a.sport_id === 'ALL' || String(a.sport_id).trim() === matchSportId) &&
+          (a.venue === 'ALL' || String(a.venue).trim() === String(sc.venue).trim()) &&
           String(a.can_record_score).toUpperCase() === 'TRUE'
         );
       }).filter(sc => {
         const sport = getSportById(sc.sport_id);
-        const text = `${sport?.sport_name || ''} ${sc.round_name} ${sc.venue}`.toLowerCase();
+        const pNames = safeJson(sc.participants_json, []).map(cid => getColorById(cid)?.color_name || '').join(' ');
+        const text = `${sport?.sport_name || sc.sport_id} ${sc.round_name} ${sc.venue} ${pNames}`.toLowerCase();
         return text.includes(q);
       });
 
       document.getElementById('scoringMatchList').innerHTML = allowedSchedules.map(sc => {
         const sport = getSportById(sc.sport_id);
+        const sportTitle = sport ? sport.sport_name : sc.sport_id;
+        const pIds = safeJson(sc.participants_json, []);
         const isDone = sc.status === 'COMPLETED';
         return `
-          <button onclick="loadScoreForm('${sc.schedule_id}')" class="w-full text-left p-3 rounded-xl border ${isDone ? 'border-emerald-200 bg-emerald-50/40' : 'border-slate-200 bg-white'} hover:border-blue-500 transition">
-            <div class="flex justify-between items-center">
-              <span class="font-bold text-sm text-slate-900">${sport ? sport.sport_name : sc.sport_id}</span>
-              <span class="text-xs px-2 py-0.5 rounded ${isDone ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}">${isDone ? 'บันทึกแล้ว' : 'รอบันทึก'}</span>
+          <button onclick="loadScoreForm('${sc.schedule_id}')" class="w-full text-left p-3 rounded-xl border ${isDone ? 'border-emerald-200 bg-emerald-50/40' : 'border-slate-200 bg-white'} hover:border-blue-500 transition space-y-1.5">
+            <div class="flex justify-between items-center gap-2">
+              <span class="font-bold text-sm text-slate-900">${sportTitle}</span>
+              <span class="text-xs px-2 py-0.5 rounded shrink-0 ${isDone ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}">${isDone ? 'บันทึกแล้ว' : 'รอบันทึก'}</span>
             </div>
-            <div class="text-xs text-slate-500 mt-1">${sc.round_name} • ${formatThaiDate(sc.match_date)} (${formatTime24(sc.start_time)} น.)</div>
+            <div class="flex flex-wrap gap-1">${renderColorPills(pIds)}</div>
+            <div class="text-xs text-slate-500">${sc.round_name} • ${formatThaiDate(sc.match_date)} (${formatTime24(sc.start_time)} น.)</div>
           </button>
         `;
       }).join('') || '<p class="text-sm text-slate-400 text-center py-6">ไม่มีรายการที่ได้รับมอบหมาย</p>';
@@ -813,10 +867,19 @@
 
     function loadScoreForm(scheduleId) {
       const sc = APP_STATE.schedules.find(s => s.schedule_id === scheduleId);
-      const sport = getSportById(sc.sport_id);
+      if (!sc) return;
+      const sport = getSportById(sc.sport_id) || {
+        sport_id: sc.sport_id,
+        sport_name: sc.sport_id,
+        category: 'ทั่วไป',
+        scoring_mode: 'GOALS_POINTS',
+        rule_config_json: '{"unit":"คะแนน"}',
+        trophy_points_json: '{"1":10,"2":7,"3":5,"4":3,"WIN":3,"DRAW":1,"LOSS":0}',
+        weight_multiplier: 1
+      };
       const existingRes = APP_STATE.results.find(r => r.schedule_id === scheduleId);
       const pIds = safeJson(sc.participants_json, []);
-      const ruleCfg = safeJson(sport.rule_config_json, {});
+      const ruleCfg = safeJson(sport.rule_config_json, { unit: 'คะแนน' });
       const prevScores = existingRes ? safeJson(existingRes.scores_detail_json, {}) : {};
 
       const isFinalDefault = sc.round_name.includes('ชิง') || pIds.length > 2;
@@ -895,7 +958,11 @@
 
     function computeMatchOutcome(scheduleId) {
       const sc = APP_STATE.schedules.find(s => s.schedule_id === scheduleId);
-      const sport = getSportById(sc.sport_id);
+      const sport = getSportById(sc.sport_id) || {
+        rule_config_json: '{"unit":"คะแนน"}',
+        trophy_points_json: '{"1":10,"2":7,"3":5,"4":3,"WIN":3,"DRAW":1,"LOSS":0}',
+        weight_multiplier: 1
+      };
       const ruleCfg = safeJson(sport.rule_config_json, {});
       const trophyPts = safeJson(sport.trophy_points_json, {});
       const mult = Number(sport.weight_multiplier || 1);
@@ -987,7 +1054,9 @@
       });
     }
 
-    // TAB 4: REPORTS
+    // -------------------------------------------------------------------------
+    // TAB 4: REPORTS (BY DAY / COLOR / SPORT)
+    // -------------------------------------------------------------------------
     function setReportMode(mode) {
       REPORT_MODE = mode;
       document.querySelectorAll('.rep-mode-btn').forEach(btn => {
@@ -1062,7 +1131,11 @@
         }).join('');
       } else if (REPORT_MODE === 'sport') {
         out.innerHTML = sports.map(sp => {
-          const spResults = results.filter(r => r.sport_id === sp.sport_id);
+          const spResults = results.filter(r => {
+            const resolved = getSportById(r.sport_id);
+            return String(r.sport_id).trim() === String(sp.sport_id).trim() ||
+                   String(resolved?.sport_id || '').trim() === String(sp.sport_id).trim();
+          });
           return `
             <div class="glass-card rounded-2xl p-5 space-y-3">
               <div class="flex items-center justify-between border-b pb-2">
@@ -1098,7 +1171,9 @@
       link.click();
     }
 
-    // TAB 5: SPORTS
+    // -------------------------------------------------------------------------
+    // TAB 5: SPORTS & TROPHY POINTS CONFIG
+    // -------------------------------------------------------------------------
     function renderSportsTab() {
       document.getElementById('sportsListContainer').innerHTML = APP_STATE.sports.map(sp => {
         const pts = safeJson(sp.trophy_points_json, {});
@@ -1188,529 +1263,4 @@
       `);
     }
 
-    function applyPresetToModal(presetKey) {
-      const p = SPORT_PRESETS[presetKey];
-      if (!p) return;
-      document.getElementById('spUnit').value = p.config.unit || 'คะแนน';
-      document.getElementById('spSort').value = p.config.sort_order || 'DESC';
-      document.getElementById('pt1').value = p.points['1'] ?? 10;
-      document.getElementById('pt2').value = p.points['2'] ?? 7;
-      document.getElementById('pt3').value = p.points['3'] ?? 5;
-      document.getElementById('pt4').value = p.points['4'] ?? 3;
-      document.getElementById('ptWin').value = p.points['WIN'] ?? 0;
-      document.getElementById('ptDraw').value = p.points['DRAW'] ?? 0;
-      document.getElementById('ptLoss').value = p.points['LOSS'] ?? 0;
-    }
-
-    async function saveSport(e, sportId) {
-      e.preventDefault();
-      const presetKey = document.getElementById('spPreset').value;
-      const preset = SPORT_PRESETS[presetKey];
-      const cfg = Object.assign({}, preset.config, {
-        unit: document.getElementById('spUnit').value,
-        sort_order: document.getElementById('spSort').value
-      });
-      const pts = {
-        "1": Number(document.getElementById('pt1').value),
-        "2": Number(document.getElementById('pt2').value),
-        "3": Number(document.getElementById('pt3').value),
-        "4": Number(document.getElementById('pt4').value),
-        "WIN": Number(document.getElementById('ptWin').value),
-        "DRAW": Number(document.getElementById('ptDraw').value),
-        "LOSS": Number(document.getElementById('ptLoss').value)
-      };
-      closeModal();
-      await postApi({
-        action: 'upsert_record',
-        sheet: 'sport',
-        id_field: 'sport_id',
-        record: {
-          sport_id: sportId,
-          year_id: APP_STATE.active_year_id,
-          sport_name: document.getElementById('spName').value,
-          category: document.getElementById('spCategory').value,
-          rule_preset: presetKey,
-          scoring_mode: preset.mode,
-          rule_config_json: JSON.stringify(cfg),
-          trophy_points_json: JSON.stringify(pts),
-          weight_multiplier: Number(document.getElementById('spMult').value || 1),
-          status: 'ACTIVE'
-        }
-      });
-    }
-
-    // สร้างตัวเลือกชั่วโมง 00-23 และนาที 00-59 แบบ 24 ชั่วโมง
-    function build24HourOptions(selectedTime, fallbackTime) {
-      const clean = formatTime24(selectedTime || fallbackTime);
-      const [selH, selM] = clean.includes(':') ? clean.split(':') : fallbackTime.split(':');
-      const hoursHtml = Array.from({ length: 24 }, (_, i) => {
-        const h = String(i).padStart(2, '0');
-        return `<option value="${h}" ${h === selH ? 'selected' : ''}>${h}</option>`;
-      }).join('');
-      const minsHtml = Array.from({ length: 60 }, (_, i) => {
-        const m = String(i).padStart(2, '0');
-        return `<option value="${m}" ${m === selM ? 'selected' : ''}>${m}</option>`;
-      }).join('');
-      return { hoursHtml, minsHtml };
-    }
-
-    function updateModalThaiDatePreview() {
-      const val = document.getElementById('scDate')?.value;
-      const previewEl = document.getElementById('scDateThaiPreview');
-      if (previewEl) {
-        previewEl.textContent = val ? `ตรงกับวันที่: ${formatThaiDate(val, true)}` : 'กรุณาเลือกวันที่แข่งขัน';
-      }
-    }
-
-    // SCHEDULE MODAL (วัน เดือน ปี พ.ศ. + เวลา 24 ชั่วโมง)
-    function openScheduleModal(scheduleId = '') {
-      const sc = scheduleId ? APP_STATE.schedules.find(s => s.schedule_id === scheduleId) : null;
-      const selectedCols = sc ? safeJson(sc.participants_json, []) : [];
-      const defaultDate = sc?.match_date || new Date().toISOString().split('T')[0];
-      const startOpts = build24HourOptions(sc?.start_time, '09:00');
-      const endOpts = build24HourOptions(sc?.end_time, '10:00');
-
-      openModal(`
-        <h3 class="text-lg font-bold mb-4">${sc ? 'แก้ไขตารางแข่งขัน' : 'เพิ่มตารางแข่งขันใหม่'}</h3>
-        <form onsubmit="saveSchedule(event, '${scheduleId}')" class="space-y-3 text-sm">
-          <div>
-            <label class="block font-semibold mb-1">ประเภทกีฬา</label>
-            <select id="scSport" required class="w-full border rounded-xl px-3 py-2">
-              ${APP_STATE.sports.map(s => `<option value="${s.sport_id}" ${sc?.sport_id === s.sport_id ? 'selected' : ''}>${s.sport_name}</option>`).join('')}
-            </select>
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block font-semibold mb-1">รอบการแข่งขัน</label>
-              <input type="text" id="scRound" required value="${sc?.round_name || 'รอบแรก'}" placeholder="เช่น รอบแรก, รอบชิงชนะเลิศ" class="w-full border rounded-xl px-3 py-2">
-            </div>
-            <div>
-              <label class="block font-semibold mb-1">สนามแข่งขัน</label>
-              <input type="text" id="scVenue" required value="${sc?.venue || 'สนามกลาง 1'}" class="w-full border rounded-xl px-3 py-2">
-            </div>
-          </div>
-          <div>
-            <label class="block font-semibold mb-1">วันที่แข่งขัน (แสดงผลเป็น พ.ศ.)</label>
-            <input type="date" id="scDate" required value="${defaultDate}" onchange="updateModalThaiDatePreview()" class="w-full border rounded-xl px-3 py-2">
-            <p id="scDateThaiPreview" class="text-xs font-semibold text-blue-700 mt-1">ตรงกับวันที่: ${formatThaiDate(defaultDate, true)}</p>
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block font-semibold mb-1">เวลาเริ่ม (ระบบ 24 ชั่วโมง)</label>
-              <div class="flex items-center gap-1.5">
-                <select id="scStartH" class="w-full border rounded-xl px-2.5 py-2 font-mono font-semibold">${startOpts.hoursHtml}</select>
-                <span class="font-bold">:</span>
-                <select id="scStartM" class="w-full border rounded-xl px-2.5 py-2 font-mono font-semibold">${startOpts.minsHtml}</select>
-                <span class="text-xs text-slate-500 shrink-0">น.</span>
-              </div>
-            </div>
-            <div>
-              <label class="block font-semibold mb-1">เวลาสิ้นสุด (ระบบ 24 ชั่วโมง)</label>
-              <div class="flex items-center gap-1.5">
-                <select id="scEndH" class="w-full border rounded-xl px-2.5 py-2 font-mono font-semibold">${endOpts.hoursHtml}</select>
-                <span class="font-bold">:</span>
-                <select id="scEndM" class="w-full border rounded-xl px-2.5 py-2 font-mono font-semibold">${endOpts.minsHtml}</select>
-                <span class="text-xs text-slate-500 shrink-0">น.</span>
-              </div>
-            </div>
-          </div>
-          <div>
-            <label class="block font-semibold mb-1">เลือกคณะสีที่ลงแข่งขัน (เลือกได้ 2 สี หรือทุกสี)</label>
-            <div class="grid grid-cols-2 gap-2 p-3 bg-slate-50 rounded-xl border">
-              ${APP_STATE.colors.map(c => `
-                <label class="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" class="sc-col-chk" value="${c.color_id}" ${selectedCols.includes(c.color_id) ? 'checked' : ''}>
-                  <span class="w-3 h-3 rounded-full" style="background:${c.hex_code}"></span>
-                  <span>${c.color_name || c.color_id}</span>
-                </label>
-              `).join('')}
-            </div>
-          </div>
-          <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-xl">บันทึกตารางแข่งขัน</button>
-        </form>
-      `);
-    }
-
-    async function saveSchedule(e, scheduleId) {
-      e.preventDefault();
-      const cols = [...document.querySelectorAll('.sc-col-chk:checked')].map(el => el.value);
-      if (cols.length < 2) {
-        alert('กรุณาเลือกคณะสีที่ลงแข่งขันอย่างน้อย 2 สี');
-        return;
-      }
-      const startTime24 = `${document.getElementById('scStartH').value}:${document.getElementById('scStartM').value}`;
-      const endTime24 = `${document.getElementById('scEndH').value}:${document.getElementById('scEndM').value}`;
-
-      closeModal();
-      await postApi({
-        action: 'upsert_record',
-        sheet: 'schedule',
-        id_field: 'schedule_id',
-        record: {
-          schedule_id: scheduleId,
-          year_id: APP_STATE.active_year_id,
-          sport_id: document.getElementById('scSport').value,
-          round_name: document.getElementById('scRound').value,
-          match_date: document.getElementById('scDate').value,
-          start_time: startTime24,
-          end_time: endTime24,
-          venue: document.getElementById('scVenue').value,
-          participants_json: JSON.stringify(cols),
-          status: 'SCHEDULED',
-          notes: ''
-        }
-      });
-    }
-
-    // TAB 6: MASTER DATA
-    function renderMasterTab() {
-      document.getElementById('yearsListContainer').innerHTML = APP_STATE.years.map(y => {
-        const isActive = String(y.is_active).toUpperCase() === 'TRUE';
-        return `
-          <div class="p-4 rounded-xl border ${isActive ? 'border-blue-500 bg-blue-50/40' : 'border-slate-200'}">
-            <div class="flex justify-between items-center">
-              <span class="font-bold text-slate-900">${y.year_name}</span>
-              ${isActive ? '<span class="text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full">ใช้งานอยู่</span>'
-                : `<button onclick="postApi({action:'set_active_year', year_id:'${y.year_id}'})" class="text-xs text-blue-600 underline">ตั้งเป็นปีปัจจุบัน</button>`}
-            </div>
-            <p class="text-xs text-slate-500 mt-1">${y.theme_name || ''}</p>
-            <p class="text-xs text-slate-400 mt-0.5">${formatThaiDate(y.start_date)} ถึง ${formatThaiDate(y.end_date)}</p>
-          </div>
-        `;
-      }).join('');
-
-      document.getElementById('colorsListContainer').innerHTML = APP_STATE.colors.map(c => `
-        <div class="p-4 rounded-xl border border-slate-200 flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <span class="w-8 h-8 rounded-xl shadow-inner shrink-0" style="background:${c.hex_code}"></span>
-            <div>
-              <div class="font-bold text-sm text-slate-900">${c.color_name || c.color_id}</div>
-              <div class="text-xs text-slate-500">${c.motto || ''}</div>
-            </div>
-          </div>
-          <button onclick="deleteRecord('color','color_id','${c.color_id}')" class="text-rose-500 hover:bg-rose-50 p-1.5 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-        </div>
-      `).join('');
-
-      document.getElementById('usersTableBody').innerHTML = APP_STATE.users.map(u => {
-        const userAssigns = APP_STATE.assignments.filter(a => a.user_id === u.user_id);
-        const assignLabels = userAssigns.map(a => {
-          const sp = a.sport_id === 'ALL' ? 'ทุกกีฬา' : (getSportById(a.sport_id)?.sport_name || a.sport_id);
-          return `<span class="inline-flex items-center gap-1 bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded text-xs mr-1 mb-1">${sp} (${a.venue}) <button onclick="deleteRecord('assignments','assign_id','${a.assign_id}')" class="text-rose-500 font-bold">×</button></span>`;
-        }).join('');
-        return `
-          <tr>
-            <td class="p-3 font-semibold">${u.full_name}</td>
-            <td class="p-3 font-mono text-xs">${u.username}</td>
-            <td class="p-3"><span class="px-2 py-0.5 rounded text-xs font-bold bg-slate-100">${u.role}</span></td>
-            <td class="p-3">${u.role === 'ADMIN' ? '<span class="text-xs text-emerald-700 font-semibold">สิทธิ์เต็มทั้งระบบ</span>' : (assignLabels || '<span class="text-xs text-slate-400">ยังไม่กำหนด</span>')}</td>
-            <td class="p-3 text-right">
-              <button onclick="deleteRecord('users','user_id','${u.user_id}')" class="text-rose-600 hover:underline text-xs">ลบ</button>
-            </td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    function openYearModal() {
-      openModal(`
-        <h3 class="text-lg font-bold mb-4">เพิ่มปีการศึกษาใหม่</h3>
-        <form onsubmit="saveYear(event)" class="space-y-3 text-sm">
-          <div><label class="block font-semibold mb-1">ชื่อปีการศึกษา</label><input type="text" id="yrName" required placeholder="เช่น ปีการศึกษา 2570" class="w-full border rounded-xl px-3 py-2"></div>
-          <div><label class="block font-semibold mb-1">คำขวัญ / ธีมงาน</label><input type="text" id="yrTheme" class="w-full border rounded-xl px-3 py-2"></div>
-          <div class="grid grid-cols-2 gap-3">
-            <div><label class="block font-semibold mb-1">วันเริ่มงาน</label><input type="date" id="yrStart" required class="w-full border rounded-xl px-3 py-2"></div>
-            <div><label class="block font-semibold mb-1">วันสิ้นสุด</label><input type="date" id="yrEnd" required class="w-full border rounded-xl px-3 py-2"></div>
-          </div>
-          <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-xl">บันทึกปีการศึกษา</button>
-        </form>
-      `);
-    }
-
-    async function saveYear(e) {
-      e.preventDefault();
-      closeModal();
-      await postApi({
-        action: 'upsert_record', sheet: 'year', id_field: 'year_id',
-        record: {
-          year_name: document.getElementById('yrName').value,
-          theme_name: document.getElementById('yrTheme').value,
-          start_date: document.getElementById('yrStart').value,
-          end_date: document.getElementById('yrEnd').value,
-          is_active: 'FALSE'
-        }
-      });
-    }
-
-    function openColorModal() {
-      openModal(`
-        <h3 class="text-lg font-bold mb-4">เพิ่มคณะสีใหม่</h3>
-        <form onsubmit="saveColor(event)" class="space-y-3 text-sm">
-          <div><label class="block font-semibold mb-1">ชื่อคณะสี</label><input type="text" id="colName" required placeholder="เช่น คณะสีม่วง" class="w-full border rounded-xl px-3 py-2"></div>
-          <div><label class="block font-semibold mb-1">เลือกเฉดสีประจำทีม</label><input type="color" id="colHex" value="#8b5cf6" class="w-full h-11 border rounded-xl p-1"></div>
-          <div><label class="block font-semibold mb-1">คำขวัญ / ฉายา</label><input type="text" id="colMotto" class="w-full border rounded-xl px-3 py-2"></div>
-          <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-xl">บันทึกคณะสี</button>
-        </form>
-      `);
-    }
-
-    async function saveColor(e) {
-      e.preventDefault();
-      closeModal();
-      await postApi({
-        action: 'upsert_record', sheet: 'color', id_field: 'color_id',
-        record: {
-          year_id: APP_STATE.active_year_id,
-          color_name: document.getElementById('colName').value,
-          hex_code: document.getElementById('colHex').value,
-          secondary_hex: '#f1f5f9',
-          motto: document.getElementById('colMotto').value,
-          status: 'ACTIVE'
-        }
-      });
-    }
-
-    function openUserModal() {
-      openModal(`
-        <h3 class="text-lg font-bold mb-4">เพิ่มผู้ใช้งานระบบ</h3>
-        <form onsubmit="saveUser(event)" class="space-y-3 text-sm">
-          <div><label class="block font-semibold mb-1">ชื่อ-นามสกุล</label><input type="text" id="uFull" required class="w-full border rounded-xl px-3 py-2"></div>
-          <div><label class="block font-semibold mb-1">Username</label><input type="text" id="uName" required class="w-full border rounded-xl px-3 py-2"></div>
-          <div><label class="block font-semibold mb-1">Password</label><input type="password" id="uPass" required class="w-full border rounded-xl px-3 py-2"></div>
-          <div>
-            <label class="block font-semibold mb-1">ระดับสิทธิ์ (Role)</label>
-            <select id="uRole" class="w-full border rounded-xl px-3 py-2">
-              <option value="SCORER">SCORER (กรรมการบันทึกผลตามที่มอบหมาย)</option>
-              <option value="ORGANIZER">ORGANIZER (ฝ่ายจัดตารางแข่งขันและกติกา)</option>
-              <option value="ADMIN">ADMIN (ผู้ดูแลระบบสูงสุด)</option>
-            </select>
-          </div>
-          <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-xl">บันทึกผู้ใช้งาน</button>
-        </form>
-      `);
-    }
-
-    async function saveUser(e) {
-      e.preventDefault();
-      closeModal();
-      await postApi({
-        action: 'upsert_record', sheet: 'users', id_field: 'user_id',
-        record: {
-          full_name: document.getElementById('uFull').value,
-          username: document.getElementById('uName').value,
-          password: document.getElementById('uPass').value,
-          role: document.getElementById('uRole').value,
-          color_id: 'ALL',
-          status: 'ACTIVE'
-        }
-      });
-    }
-
-    function openAssignModal() {
-      openModal(`
-        <h3 class="text-lg font-bold mb-4">มอบหมายสิทธิ์ดูแลกีฬา / สนามแข่ง</h3>
-        <form onsubmit="saveAssignment(event)" class="space-y-3 text-sm">
-          <div>
-            <label class="block font-semibold mb-1">เลือกเจ้าหน้าที่</label>
-            <select id="asUser" class="w-full border rounded-xl px-3 py-2">
-              ${APP_STATE.users.map(u => `<option value="${u.user_id}">${u.full_name} (${u.role})</option>`).join('')}
-            </select>
-          </div>
-          <div>
-            <label class="block font-semibold mb-1">ประเภทกีฬาที่รับผิดชอบ</label>
-            <select id="asSport" class="w-full border rounded-xl px-3 py-2">
-              <option value="ALL">ทุกประเภทกีฬา (ALL)</option>
-              ${APP_STATE.sports.map(s => `<option value="${s.sport_id}">${s.sport_name}</option>`).join('')}
-            </select>
-          </div>
-          <div>
-            <label class="block font-semibold mb-1">สนามแข่งขัน (ระบุชื่อสนาม หรือ ALL)</label>
-            <input type="text" id="asVenue" value="ALL" class="w-full border rounded-xl px-3 py-2">
-          </div>
-          <button type="submit" class="w-full bg-indigo-600 text-white font-semibold py-2.5 rounded-xl">บันทึกการมอบหมายสิทธิ์</button>
-        </form>
-      `);
-    }
-
-    async function saveAssignment(e) {
-      e.preventDefault();
-      closeModal();
-      await postApi({
-        action: 'upsert_record', sheet: 'assignments', id_field: 'assign_id',
-        record: {
-          year_id: APP_STATE.active_year_id,
-          user_id: document.getElementById('asUser').value,
-          sport_id: document.getElementById('asSport').value,
-          venue: document.getElementById('asVenue').value || 'ALL',
-          can_edit_schedule: 'TRUE',
-          can_record_score: 'TRUE'
-        }
-      });
-    }
-
-    // TAB 7: SETTINGS
-    async function saveSystemSettings(e) {
-      e.preventDefault();
-      const newGas = document.getElementById('setGasUrl').value.trim();
-      if (newGas) {
-        GAS_URL = newGas;
-        localStorage.setItem('sportg_gas_url', newGas);
-      }
-
-      const fileInput = document.getElementById('setLogoFile');
-      let logoBase64 = '';
-      let logoFilename = '';
-
-      if (fileInput.files && fileInput.files[0]) {
-        const file = fileInput.files[0];
-        logoFilename = file.name;
-        logoBase64 = await toBase64(file);
-      }
-
-      await postApi({
-        action: 'update_settings',
-        logo_base64: logoBase64,
-        logo_filename: logoFilename,
-        settings: {
-          event_name: document.getElementById('setEventName').value,
-          event_subtitle: document.getElementById('setEventSubtitle').value,
-          logo_url: document.getElementById('setLogoUrl').value,
-          refresh_interval_sec: document.getElementById('setRefreshSec').value
-        }
-      });
-    }
-
-    // AUTH & HELPERS
-    function openLoginModal() {
-      openModal(`
-        <h3 class="text-lg font-bold mb-1">เข้าสู่ระบบเจ้าหน้าที่</h3>
-        <p class="text-xs text-slate-500 mb-4">สำหรับกรรมการบันทึกผล ฝ่ายจัดแข่งขัน และผู้ดูแลระบบ</p>
-        <form onsubmit="submitLogin(event)" class="space-y-3 text-sm">
-          <div><label class="block font-semibold mb-1">ชื่อผู้ใช้งาน (Username)</label><input type="text" id="loginUser" required class="w-full border rounded-xl px-3 py-2"></div>
-          <div><label class="block font-semibold mb-1">รหัสผ่าน (Password)</label><input type="password" id="loginPass" required class="w-full border rounded-xl px-3 py-2"></div>
-          <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-xl">เข้าสู่ระบบ</button>
-        </form>
-      `);
-    }
-
-    async function submitLogin(e) {
-      e.preventDefault();
-      const res = await postApi({
-        action: 'login',
-        username: document.getElementById('loginUser').value,
-        password: document.getElementById('loginPass').value
-      });
-      if (res.status === 'success') {
-        CURRENT_USER = res.user;
-        USER_ASSIGNMENTS = res.assignments || [];
-        localStorage.setItem('sportg_user', JSON.stringify(CURRENT_USER));
-        localStorage.setItem('sportg_assignments', JSON.stringify(USER_ASSIGNMENTS));
-        closeModal();
-        updateAuthUI();
-        renderAll();
-      }
-    }
-
-    function logoutUser() {
-      CURRENT_USER = null;
-      USER_ASSIGNMENTS = [];
-      localStorage.removeItem('sportg_user');
-      localStorage.removeItem('sportg_assignments');
-      updateAuthUI();
-      switchTab('dashboard');
-      renderAll();
-    }
-
-    function updateAuthUI() {
-      const authArea = document.getElementById('authArea');
-      if (CURRENT_USER) {
-        authArea.innerHTML = `
-          <div class="flex items-center gap-2 bg-slate-800 px-3 py-1 rounded-lg border border-slate-700 text-xs">
-            <span class="text-emerald-400 font-bold">${CURRENT_USER.full_name}</span>
-            <button onclick="logoutUser()" class="text-rose-400 hover:underline ml-1">ออก</button>
-          </div>
-        `;
-      } else {
-        authArea.innerHTML = `
-          <button onclick="openLoginModal()" class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs md:text-sm font-medium px-3 py-1.5 rounded-lg transition shadow">
-            <i data-lucide="log-in" class="w-4 h-4"></i> เจ้าหน้าที่
-          </button>
-        `;
-      }
-
-      document.querySelectorAll('#mainNav [data-role]').forEach(btn => {
-        const roles = btn.dataset.role.split(',');
-        const allowed = CURRENT_USER && roles.includes(CURRENT_USER.role);
-        btn.classList.toggle('hidden', !allowed);
-      });
-      lucide.createIcons();
-    }
-
-    function switchTab(tabName) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-      document.getElementById(`tab-${tabName}`)?.classList.remove('hidden');
-      document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.tab === tabName);
-      });
-    }
-
-    async function deleteRecord(sheet, idField, idValue) {
-      if (!confirm('ยืนยันการลบข้อมูลรายการนี้?')) return;
-      await postApi({ action: 'delete_record', sheet, id_field: idField, id_value: idValue });
-    }
-
-    function getSportById(id) { return APP_STATE?.sports.find(s => String(s.sport_id) === String(id)); }
-    function getColorById(id) {
-      const targetId = (typeof id === 'object' && id !== null) ? id.color_id : id;
-      return APP_STATE?.colors.find(c => String(c.color_id) === String(targetId));
-    }
-
-    function renderColorPills(ids) {
-      if (!Array.isArray(ids)) return '';
-      return ids.map(item => {
-        const targetId = (typeof item === 'object' && item !== null) ? (item.color_id || item.id) : item;
-        const c = getColorById(targetId);
-        if (!c) return `<span class="text-xs px-2.5 py-0.5 bg-slate-200 text-slate-700 rounded-full font-medium">${targetId || '-'}</span>`;
-        const label = c.color_name || targetId || '-';
-        return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border" style="background:${c.secondary_hex || '#f8fafc'}; border-color:${c.hex_code || '#cbd5e1'}40; color:#0f172a">
-          <span class="w-2.5 h-2.5 rounded-full" style="background:${c.hex_code || '#64748b'}"></span>${label}
-        </span>`;
-      }).join('');
-    }
-
-    function safeJson(str, fallback) {
-      try { return typeof str === 'object' ? str : JSON.parse(str); } catch (e) { return fallback; }
-    }
-
-    function toBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = err => reject(err);
-      });
-    }
-
-    function openModal(html) {
-      document.getElementById('modalBox').innerHTML = `
-        <div class="flex justify-end mb-1"><button onclick="closeModal()" class="text-slate-400 hover:text-slate-700 text-xl font-bold leading-none">×</button></div>
-        ${html}
-      `;
-      document.getElementById('modalBackdrop').classList.remove('hidden');
-    }
-
-    function closeModal() {
-      document.getElementById('modalBackdrop').classList.add('hidden');
-    }
-
-    function showToast(msg, type = 'info') {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.remove('hidden', 'border-emerald-500', 'border-rose-500');
-      if (type === 'success') t.classList.add('border-emerald-500');
-      if (type === 'error') t.classList.add('border-rose-500');
-      setTimeout(() => t.classList.add('hidden'), 3200);
-    }
-  </script>
-</body>
-</html>
+    function
