@@ -690,6 +690,7 @@
       `;
     }
 
+    // 1) แสดงหมายเหตุในการ์ดสรุปผลการแข่งขัน (หน้าแรก และ หน้ารายงาน)
     function renderResultCardCompact(res) {
       const sport = getSportById(res.sport_id);
       const sc = APP_STATE.schedules.find(s => s.schedule_id === res.schedule_id);
@@ -714,6 +715,11 @@
               `;
             }).join('')}
           </div>
+          ${res.notes ? `
+            <div class="mt-2 text-xs text-slate-700 bg-amber-50 border border-amber-200/80 px-2.5 py-1.5 rounded-lg">
+              <span class="font-semibold text-amber-900">📝 หมายเหตุ:</span> ${res.notes}
+            </div>
+          ` : ''}
         </div>
       `;
     }
@@ -828,6 +834,7 @@
       }).join('') || '<p class="text-sm text-slate-400 text-center py-6">ไม่มีรายการที่ได้รับมอบหมาย</p>';
     }
 
+    // 2) ฟอร์มบันทึกผลการแข่งขัน (เพิ่มช่องกรอกหมายเหตุ)
     function loadScoreForm(scheduleId) {
       const sc = APP_STATE.schedules.find(s => s.schedule_id === scheduleId);
       if (!sc) return;
@@ -844,6 +851,7 @@
       const pIds = safeJson(sc.participants_json, []);
       const ruleCfg = safeJson(sport.rule_config_json, { unit: 'คะแนน' });
       const prevScores = existingRes ? safeJson(existingRes.scores_detail_json, {}) : {};
+      const prevNotes = existingRes ? (existingRes.notes || '') : '';
 
       const isFinalDefault = sc.round_name.includes('ชิง') || pIds.length > 2;
 
@@ -917,6 +925,14 @@
                 </div>
               `;
             }).join('')}
+          </div>
+
+          <!-- ช่องกรอกหมายเหตุเพิ่มเติม -->
+          <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50/50">
+            <label for="matchResultNotes" class="block text-xs font-semibold text-slate-700 mb-1.5">
+              หมายเหตุ / รายละเอียดเพิ่มเติม (ถ้ามี)
+            </label>
+            <textarea id="matchResultNotes" rows="2" placeholder="เช่น คะแนนรายเซต 25-21, 25-19 หรือ ชนะบาย, ผู้ทำคะแนนสูงสุด..." class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-blue-500">${prevNotes}</textarea>
           </div>
 
           <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
@@ -1022,6 +1038,7 @@
       });
     }
 
+    // 3) ส่งค่าหมายเหตุไปบันทึกในแท็บ results
     async function submitMatchResult(e, scheduleId) {
       e.preventDefault();
       const sc = APP_STATE.schedules.find(s => s.schedule_id === scheduleId);
@@ -1034,6 +1051,7 @@
       }
 
       const status = document.getElementById('matchStatusSelect').value;
+      const notes = document.getElementById('matchResultNotes')?.value.trim() || '';
 
       await postApi({
         action: 'save_result',
@@ -1047,7 +1065,8 @@
           scores_detail_json: JSON.stringify(scoresDetail),
           rankings_json: JSON.stringify(rankings),
           trophy_awarded_json: JSON.stringify(trophyAwarded),
-          recorded_by: CURRENT_USER ? CURRENT_USER.full_name : 'Admin'
+          recorded_by: CURRENT_USER ? CURRENT_USER.full_name : 'Admin',
+          notes: notes
         }
       });
     }
@@ -1145,17 +1164,19 @@
       }
     }
 
+// 4) เพิ่มคอลัมน์หมายเหตุในไฟล์ส่งออก CSV
     function exportReportCSV() {
-      let csv = '\uFEFFประเภทกีฬา,รอบการแข่งขัน,วันที่ (พ.ศ.),เวลา,สี,อันดับ,สถิติ/คะแนน,คะแนนถ้วยรางวัลรวม\n';
+      let csv = '\uFEFFประเภทกีฬา,รอบการแข่งขัน,วันที่ (พ.ศ.),เวลา,สี,อันดับ,สถิติ/คะแนน,คะแนนถ้วยรางวัลรวม,หมายเหตุ\n';
       APP_STATE.results.forEach(r => {
         const sp = getSportById(r.sport_id);
         const sc = APP_STATE.schedules.find(s => s.schedule_id === r.schedule_id);
         const rks = safeJson(r.rankings_json, []);
         const ptsMap = safeJson(r.trophy_awarded_json, {});
+        const safeNotes = String(r.notes || '').replace(/"/g, '""');
         rks.forEach(rk => {
           const col = getColorById(rk.color_id);
           const timeStr = sc ? `${formatTime24(sc.start_time)}-${formatTime24(sc.end_time)}` : '';
-          csv += `"${sp?.sport_name || ''}","${sc?.round_name || ''}","${sc ? formatThaiDateSlash(sc.match_date) : ''}","${timeStr}","${col?.color_name || ''}",${rk.rank},"${rk.score_display}",${ptsMap[rk.color_id] || 0}\n`;
+          csv += `"${sp?.sport_name || ''}","${sc?.round_name || ''}","${sc ? formatThaiDateSlash(sc.match_date) : ''}","${timeStr}","${col?.color_name || ''}",${rk.rank},"${rk.score_display}",${ptsMap[rk.color_id] || 0},"${safeNotes}"\n`;
         });
       });
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
